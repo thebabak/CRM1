@@ -4,14 +4,48 @@
 {% block extrastyle %}
 {{ block.super }}
 <style>
+    :root {
+        --login-primary: #1c39bb;
+        --login-secondary: #1f7a8c;
+        --login-accent: #4cb5ae;
+        --login-text: #0f172a;
+        --login-muted: #64748b;
+    }
+
     body.login {
-        background:
-            radial-gradient(circle at top left, rgba(28, 57, 187, 0.18), transparent 28%),
-            radial-gradient(circle at bottom right, rgba(76, 181, 174, 0.18), transparent 30%),
-            linear-gradient(135deg, #0f172a 0%, #12324a 45%, #1f7a8c 100%);
+        font-family: "Segoe UI", "Poppins", "Trebuchet MS", sans-serif;
+        background: #000000;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    body.login::before,
+    body.login::after {
+        content: "";
+        position: fixed;
+        width: 280px;
+        height: 280px;
+        border-radius: 50%;
+        pointer-events: none;
+        filter: blur(4px);
+        z-index: 0;
+    }
+
+    body.login::before {
+        left: -90px;
+        top: -70px;
+        background: radial-gradient(circle, rgba(76, 181, 174, 0.42), rgba(76, 181, 174, 0));
+    }
+
+    body.login::after {
+        right: -80px;
+        bottom: -80px;
+        background: radial-gradient(circle, rgba(28, 57, 187, 0.45), rgba(28, 57, 187, 0));
     }
 
     .login #container {
+        position: relative;
+        z-index: 1;
         width: 100%;
         max-width: 520px;
         margin: 7vh auto 0;
@@ -23,7 +57,7 @@
         background: rgba(255, 255, 255, 0.92);
         backdrop-filter: blur(18px);
         border-radius: 28px;
-        padding: 2rem;
+        padding: 2rem 2rem 1.6rem;
         box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
@@ -34,7 +68,9 @@
 
     .login .form-row label {
         font-weight: 700;
-        color: #0f172a;
+        color: var(--login-text);
+        margin-bottom: 0.25rem;
+        display: inline-block;
     }
 
     .login .form-control {
@@ -42,11 +78,15 @@
         border-radius: 14px;
         border: 1px solid rgba(148, 163, 184, 0.35);
         padding: 0.8rem 0.95rem;
+        background: #ffffff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
 
     .login .form-control:focus {
-        border-color: #1f7a8c;
+        border-color: var(--login-secondary);
         box-shadow: 0 0 0 0.2rem rgba(31, 122, 140, 0.15);
+        transform: translateY(-1px);
+        outline: none;
     }
 
     .login .submit-row input.default {
@@ -54,10 +94,20 @@
         border-radius: 14px;
         padding: 0.85rem 1rem;
         font-weight: 700;
+        border: 0;
+        background: linear-gradient(135deg, var(--login-primary), var(--login-secondary));
+        box-shadow: 0 12px 24px rgba(28, 57, 187, 0.24);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    }
+
+    .login .submit-row input.default:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 28px rgba(28, 57, 187, 0.3);
+        filter: saturate(1.05);
     }
 
     .login .password-reset-link a {
-        color: #1f7a8c;
+        color: var(--login-secondary);
         font-weight: 600;
         text-decoration: none;
     }
@@ -76,7 +126,7 @@
         align-items: center;
         gap: 0.75rem;
         margin-bottom: 1.25rem;
-        color: #0f172a;
+        color: var(--login-text);
         font-weight: 800;
         letter-spacing: -0.02em;
     }
@@ -85,12 +135,64 @@
         width: 44px;
         height: 44px;
         border-radius: 14px;
-        background: linear-gradient(135deg, #1C39BB, #1f7a8c);
+        background: linear-gradient(135deg, var(--login-primary), var(--login-secondary));
         color: #fff;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         box-shadow: 0 12px 24px rgba(28, 57, 187, 0.25);
+    }
+
+    .login .brand-subtitle {
+        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--login-muted);
+        font-weight: 700;
+    }
+
+    .login .brand-heading {
+        font-size: 1.35rem;
+        line-height: 1.1;
+    }
+
+    .login .footer-note {
+        text-align: center;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    @keyframes loginFadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .login #content-main {
+        animation: loginFadeUp 0.45s ease;
+    }
+
+    @media (max-width: 576px) {
+        .login #container {
+            margin-top: 5vh;
+        }
+
+        .login #content-main {
+            border-radius: 20px;
+            padding: 1.5rem 1.2rem 1.2rem;
+        }
+
+        .login .brand-heading {
+            font-size: 1.2rem;
+        }
     }
 </style>
 {% endblock %}
@@ -100,8 +202,8 @@
     <div class="brand-title">
         <span class="brand-mark">A</span>
         <div>
-            <div class="small text-muted">ATO CRM</div>
-            <div style="font-size: 1.35rem; line-height: 1.1;">Admin Login</div>
+            <div class="brand-subtitle">ATO CRM</div>
+            <div class="brand-heading">Admin Login</div>
         </div>
     </div>
     {% if user.is_authenticated %}
@@ -132,8 +234,8 @@
         </div>
     </form>
     
-    <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
-        <p style="font-size: 12px; color: #666;">
+    <div class="footer-note">
+        <p>
             &copy; {% now "Y" %} ATO CRM - Internal Communication System
         </p>
     </div>
