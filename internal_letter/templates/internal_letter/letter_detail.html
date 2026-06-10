@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}{{ letter.subject }}{% endblock %}
+
+{% block content %}
+<style>
+  .letter-detail-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+  
+  .letter-detail-header {
+    background: linear-gradient(135deg, #1C39BB 0%, #155f83 100%);
+    color: white;
+    padding: 2rem;
+  }
+  
+  .letter-detail-body {
+    padding: 2rem;
+  }
+  
+  .letter-info {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .letter-content {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #374151;
+    margin: 2rem 0;
+    padding: 1rem 0;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .reply-section {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+  
+  .btn-action {
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  
+  .btn-primary-custom {
+    background: #1C39BB;
+    border: none;
+  }
+  
+  .btn-primary-custom:hover {
+    background: #155f83;
+  }
+  
+  .btn-success-custom {
+    background: #198754;
+    border: none;
+  }
+  
+  .btn-danger-custom {
+    background: #dc3545;
+    border: none;
+  }
+</style>
+
+<div class="container">
+  <div class="letter-detail-card">
+    <div class="letter-detail-header">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <a href="/letters/" class="text-white text-decoration-none mb-2 d-inline-block">
+            <i class="bi bi-arrow-left me-2"></i> Back to Inbox
+          </a>
+          <h2 style="color: white; margin-top: 0.5rem;">{{ letter.subject }}</h2>
+        </div>
+        <span class="badge {% if letter.status == 'SENT' %}bg-success{% else %}bg-secondary{% endif %} fs-6">
+          {{ letter.status }}
+        </span>
+      </div>
+    </div>
+    
+    <div class="letter-detail-body">
+      <div class="letter-info">
+        <div class="row">
+          <div class="col-md-6 mb-2">
+            <strong><i class="bi bi-person"></i> From:</strong>
+            {{ letter.sender.get_full_name|default:letter.sender.username }}
+          </div>
+          <div class="col-md-6 mb-2">
+            <strong><i class="bi bi-envelope"></i> To:</strong>
+            {{ letter.recipient.get_full_name|default:letter.recipient.username }}
+          </div>
+          {% if letter.cc.all %}
+            <div class="col-12 mb-2">
+              <strong><i class="bi bi-people"></i> CC:</strong>
+              {% for cc_user in letter.cc.all %}
+                {{ cc_user.get_full_name|default:cc_user.username }}{% if not forloop.last %}, {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+          <div class="col-md-6">
+            <strong><i class="bi bi-calendar"></i> Sent:</strong>
+            {{ letter.sent_at|date:"F d, Y H:i"|default:"Not sent yet" }}
+          </div>
+          <div class="col-md-6">
+            <strong><i class="bi bi-eye"></i> Read:</strong>
+            {% if letter.read_at %}
+              {{ letter.read_at|date:"F d, Y H:i" }}
+            {% else %}
+              Not read yet
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <div class="letter-content">
+        {{ letter.body|linebreaks }}
+      </div>
+      
+      <div class="d-flex gap-2">
+        {% if letter.status == 'SENT' and letter.recipient == user %}
+          <a href="/letters/{{ letter.pk }}/mark-unread/" class="btn btn-secondary btn-action">
+            <i class="bi bi-eye-slash me-1"></i> Mark Unread
+          </a>
+        {% endif %}
+        
+        <a href="/letters/" class="btn btn-primary-custom btn-action text-white">
+          <i class="bi bi-arrow-left me-1"></i> Back to List
+        </a>
+      </div>
+      
+      {% if can_reply and letter.status == 'SENT' %}
+        <div class="reply-section">
+          <h5><i class="bi bi-reply-fill me-2" style="color: #1C39BB;"></i> Reply to this letter</h5>
+          <form method="post">
+            {% csrf_token %}
+            {{ reply_form.as_p }}
+            <button type="submit" name="reply" class="btn btn-primary-custom btn-action text-white">
+              <i class="bi bi-send me-1"></i> Send Reply
+            </button>
+          </form>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

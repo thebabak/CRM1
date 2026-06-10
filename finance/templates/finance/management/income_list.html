@@ -1,0 +1,29 @@
+{% extends "finance/finance_base.html" %}
+{% block title %}Incomes{% endblock %}
+{% block finance_content %}
+<div class="card">
+    <div class="card-header">
+        <h3><i class="bi bi-wallet2"></i> Income List</h3>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Income tracking feature coming soon.
+        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Client</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="4" class="text-center">No income records found</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

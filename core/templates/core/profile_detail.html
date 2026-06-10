@@ -1,0 +1,455 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile.user.get_full_name }} ATO Staff Profile{% endblock %}
+
+{% block content %}
+<style>
+  .profile-header {
+    background: linear-gradient(135deg, #1C39BB 0%, #155f83 100%);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .profile-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: bold;
+    border: 3px solid white;
+    margin-bottom: 1rem;
+  }
+  
+  .stat-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+  
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1C39BB;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-label {
+    color: #6b7280;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+  
+  .info-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+  }
+  
+  .info-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e5e7eb;
+  }
+  
+  .info-row {
+    display: flex;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .info-label {
+    width: 140px;
+    font-weight: 600;
+    color: #6b7280;
+  }
+  
+  .info-value {
+    flex: 1;
+    color: #111827;
+  }
+  
+  .badge-role {
+    background: linear-gradient(135deg, #1C39BB, #155f83);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .badge-department {
+    background: #eef2ff;
+    color: #1C39BB;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+  }
+  
+  .table-custom {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  .table-custom thead th {
+    background: #f8fafc;
+    color: #6b7280;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    padding: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+  }
+  
+  .table-custom tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .table-custom tbody tr:hover {
+    background: #f8fafc;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .status-APPROVED {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  
+  .status-REJECTED {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  
+  .status-PENDING {
+    background: #fed7aa;
+    color: #92400e;
+  }
+  
+  .status-SUBMITTED {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 2rem 0 1rem 0;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: white;
+    border-radius: 20px;
+    color: #6b7280;
+  }
+  
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  @media (max-width: 768px) {
+    .profile-header {
+      padding: 1.5rem;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+    }
+    
+    .info-row {
+      flex-direction: column;
+    }
+    
+    .info-label {
+      width: 100%;
+      margin-bottom: 0.25rem;
+    }
+  }
+</style>
+
+<div class="container-narrow">
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="row align-items-center">
+      <div class="col-md-2 text-center text-md-start">
+        <div class="profile-avatar mx-auto mx-md-0">
+          {{ profile.user.get_full_name|slice:":1" }}{{ profile.user.get_full_name|slice:"-1"|default:profile.user.username|slice:":1" }}
+        </div>
+      </div>
+      <div class="col-md-10 text-center text-md-start">
+        <h1 style="color: white; margin-bottom: 0.5rem;">{{ profile.user.get_full_name }}</h1>
+        <p style="color: rgba(255,255,255,0.9); margin-bottom: 0.5rem;">
+          <i class="bi bi-person-badge"></i> @{{ profile.user.username }}
+        </p>
+        <div>
+          <span class="badge-role">{{ profile.get_role_display }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.accrued|floatformat:1 }}</div>
+        <div class="stat-label">Total Accrued Days</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.used|floatformat:1 }}</div>
+        <div class="stat-label">Used Days</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.remaining|floatformat:1 }}</div>
+        <div class="stat-label">Remaining Days</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.pending_days|floatformat:1 }}</div>
+        <div class="stat-label">Pending Days</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Information -->
+  <div class="info-card">
+    <div class="info-title">
+      <i class="bi bi-person-circle me-2"></i>
+      Profile Information
+    </div>
+    <div class="info-row">
+      <div class="info-label">Employee ID:</div>
+      <div class="info-value">{{ profile.employee_id }}</div>
+    </div>
+    <div class="info-row">
+      <div class="info-label">Position:</div>
+      <div class="info-value">
+        {% if profile.position %}
+          {{ profile.position.name }}
+        {% else %}
+          <span class="text-muted">—</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="info-row">
+      <div class="info-label">Departments:</div>
+      <div class="info-value">
+        {% for d in profile.departments.all %}
+          <span class="badge-department">
+            <i class="bi bi-building me-1"></i>{{ d.name }}
+          </span>
+        {% empty %}
+          <span class="text-muted">—</span>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="info-row">
+      <div class="info-label">Email:</div>
+      <div class="info-value">{{ profile.user.email|default:"—" }}</div>
+    </div>
+    <div class="info-row">
+      <div class="info-label">Member Since:</div>
+      <div class="info-value">{{ profile.user.date_joined|date:"F d, Y" }}</div>
+    </div>
+  </div>
+
+  <!-- Leave Details Card -->
+  <div class="info-card">
+    <div class="info-title">
+      <i class="bi bi-calendar-check me-2"></i>
+      Leave Details
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="info-row">
+          <div class="info-label">Annual Allowance:</div>
+          <div class="info-value">{{ profile.annual_leave_days }} days</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Approved Days:</div>
+          <div class="info-value">{{ profile.approved_days }} days</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="info-row">
+          <div class="info-label">Rejected Days:</div>
+          <div class="info-value">{{ profile.rejected_days }} days</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Cancelled Days:</div>
+          <div class="info-value">{{ profile.cancelled_days }} days</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leave Requests Section -->
+  <div class="section-title">
+    <i class="bi bi-briefcase me-2"></i>
+    Leave Requests
+    <span class="text-muted fs-6 ms-2">({{ leave_requests|length }} total)</span>
+  </div>
+  
+  {% if leave_requests %}
+    <div class="table-responsive">
+      <table class="table table-custom">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Mode</th>
+            <th>Status</th>
+            <th>Dates / Time</th>
+            <th>Days</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lr in leave_requests %}
+            <tr>
+              <td>
+                <a href="{% url 'request_detail' lr.base_request.pk %}" style="color: #1C39BB; text-decoration: none; font-weight: 600;">
+                  #{{ lr.pk }}
+                </a>
+              </td>
+              <td>{{ lr.get_leave_type_display }}</td>
+              <td>{{ lr.get_mode_display }}</td>
+              <td>
+                <span class="status-badge status-{{ lr.base_request.status }}">
+                  {{ lr.base_request.status }}
+                </span>
+              </td>
+              <td>
+                {% if lr.mode == "DAILY" %}
+                  <i class="bi bi-calendar-range"></i> {{ lr.daily_from|date:"M d" }} → {{ lr.daily_to|date:"M d, Y" }}
+                {% else %}
+                  <i class="bi bi-clock"></i> {{ lr.hourly_date|date:"M d" }} {{ lr.hourly_from|time:"H:i" }}–{{ lr.hourly_to|time:"H:i" }}
+                {% endif %}
+              </td>
+              <td>{{ lr.requested_days|floatformat:1 }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="bi bi-inbox"></i>
+      </div>
+      <p>No leave requests found.</p>
+    </div>
+  {% endif %}
+
+  <!-- Approvals Made Section -->
+  <div class="section-title">
+    <i class="bi bi-check2-circle me-2"></i>
+    Approvals Made
+    <span class="text-muted fs-6 ms-2">({{ approvals|length }} total)</span>
+  </div>
+  
+  {% if approvals %}
+    <div class="table-responsive">
+      <table class="table table-custom">
+        <thead>
+          <tr>
+            <th>Request ID</th>
+            <th>Decision</th>
+            <th>Role at Time</th>
+            <th>Date</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in approvals %}
+            <tr>
+              <td>
+                <a href="{% url 'request_detail' a.request.pk %}" style="color: #1C39BB; text-decoration: none; font-weight: 600;">
+                  #{{ a.request.pk }}
+                </a>
+              </td>
+              <td>
+                {% if a.decision == "APPROVE" %}
+                  <span style="color: #059669;">
+                    <i class="bi bi-check-circle-fill"></i> Approved
+                  </span>
+                {% else %}
+                  <span style="color: #dc2626;">
+                    <i class="bi bi-x-circle-fill"></i> Rejected
+                  </span>
+                {% endif %}
+              </td>
+              <td>{{ a.get_decided_role_display }}</td>
+              <td>{{ a.decided_at|date:"d M Y, H:i" }}</td>
+              <td>{{ a.comment|default:"—"|truncatechars:50 }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="bi bi-check2-square"></i>
+      </div>
+      <p>No approvals made yet.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

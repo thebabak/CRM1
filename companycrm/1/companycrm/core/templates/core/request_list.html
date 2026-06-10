@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+{% block title %}Requests · Company CRM{% endblock %}
+{% block content %}
+  <style>
+  .requests-page {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  .requests-hero {
+    border: 0;
+    border-radius: 24px;
+    background:
+      radial-gradient(circle at top right, rgba(13, 110, 253, 0.14), transparent 34%),
+      linear-gradient(135deg, #f8fafc 0%, #eef2ff 55%, #ffffff 100%);
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.09);
+    overflow: hidden;
+  }
+
+  .filter-bar {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 12px;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+  }
+
+  .requests-card {
+    border: 0;
+    border-radius: 24px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+
+  .requests-table {
+    vertical-align: middle;
+  }
+
+  .requests-table thead th {
+    background: #f8fafc;
+    color: #6b7280;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 14px 16px;
+  }
+
+  .requests-table tbody td {
+    padding: 15px 16px;
+    border-bottom: 1px solid #f1f3f5;
+  }
+
+  .requests-table tbody tr {
+    transition: background 0.15s ease;
+  }
+
+  .requests-table tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  .request-id {
+    font-weight: 800;
+    color: #111827;
+  }
+
+  .request-title-link {
+    font-weight: 700;
+    color: #111827;
+    text-decoration: none;
+  }
+
+  .request-title-link:hover {
+    color: #0d6efd;
+  }
+
+  .status-badge {
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+
+  .creator-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    padding: 6px 11px;
+    font-size: 13px;
+    color: #374151;
+  }
+
+  .date-text {
+    color: #6b7280;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .btn-pill {
+    border-radius: 999px;
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .action-btn {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+  }
+
+  .empty-state {
+    padding: 46px 20px;
+    text-align: center;
+    color: #6b7280;
+  }
+
+  .empty-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+    background: #f1f5f9;
+    color: #64748b;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 768px) {
+    .table-responsive {
+      border-radius: 24px;
+    }
+  }
+  </style>
+  <div class="requests-page">
+    <div class="card requests-hero mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div>
+            <div class="text-muted small mb-2">
+              <i class="bi bi-kanban me-1"></i>
+              Request Management
+            </div>
+            <h1 class="page-title mb-1">Requests</h1>
+            <div class="text-muted">View, track, and manage all submitted company requests.</div>
+          </div>
+          <a class="btn btn-primary btn-pill" href="{% url 'request_new_hub' %}">
+            <i class="bi bi-plus-square me-1"></i>
+            New Request
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="filter-bar mb-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-outline-secondary btn-sm btn-pill"
+             href="{% url 'request_list' %}">
+            <i class="bi bi-list-ul me-1"></i>
+            All Requests
+          </a>
+          <a class="btn btn-outline-secondary btn-sm btn-pill" href="?mine=1">
+            <i class="bi bi-person me-1"></i>
+            My Requests
+          </a>
+          <a class="btn btn-outline-secondary btn-sm btn-pill" href="?pending=1">
+            <i class="bi bi-hourglass-split me-1"></i>
+            Pending
+          </a>
+        </div>
+        <div class="text-muted small">
+          <i class="bi bi-info-circle me-1"></i>
+          Click a request title to view details.
+        </div>
+      </div>
+    </div>
+    <div class="card requests-card">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 requests-table">
+            <thead>
+              <tr>
+                <th style="width:80px;">ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Required Role</th>
+                <th>Creator</th>
+                <th>Date of Request</th>
+                <th class="text-center" style="width:120px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in requests %}
+                <tr>
+                  <td>
+                    <span class="request-id">#{{ r.pk }}</span>
+                  </td>
+                  <td>
+                    <a class="request-title-link" href="{% url 'request_detail' r.pk %}">{{ r.title }}</a>
+                  </td>
+                  <td>
+                    {% if r.status == "APPROVED" or r.status == "APPROVE" %}
+                      <span class="badge text-bg-success status-badge">
+                        <i class="bi bi-check-circle me-1"></i>
+                        {{ r.status }}
+                      </span>
+                    {% elif r.status == "REJECTED" or r.status == "REJECT" %}
+                      <span class="badge text-bg-danger status-badge">
+                        <i class="bi bi-x-circle me-1"></i>
+                        {{ r.status }}
+                      </span>
+                    {% elif r.status == "CANCELLED" or r.status == "CANCELED" %}
+                      <span class="badge text-bg-secondary status-badge">
+                        <i class="bi bi-x-octagon me-1"></i>
+                        {{ r.status }}
+                      </span>
+                    {% else %}
+                      <span class="badge text-bg-dark status-badge">
+                        <i class="bi bi-clock-history me-1"></i>
+                        {{ r.status }}
+                      </span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="text-muted small">{{ r.get_required_role_display }}</span>
+                  </td>
+                  <td>
+                    <span class="creator-pill">
+                      <i class="bi bi-person-circle"></i>
+                      {{ r.created_by.username }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="date-text">
+                      <i class="bi bi-calendar-event me-1"></i>
+                      {{ r.created_at|date:"d M Y, H:i" }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <a class="btn btn-sm btn-outline-primary action-btn"
+                       href="{% url 'request_detail' r.pk %}"
+                       title="View request">
+                      <i class="bi bi-box-arrow-in-right"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="7">
+                    <div class="empty-state">
+                      <div class="empty-icon">
+                        <i class="bi bi-inbox"></i>
+                      </div>
+                      <div class="fw-bold">No requests found</div>
+                      <div class="small mt-1">There are currently no requests to display.</div>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

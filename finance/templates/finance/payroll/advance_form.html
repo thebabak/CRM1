@@ -1,0 +1,274 @@
+{% extends "finance/finance_base.html" %}
+{% load persian_calendar %}
+{% block title %}Request Salary Advance{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+<style>
+    .advance-request-shell {
+        max-width: 1120px;
+        margin: 0 auto;
+    }
+
+    .advance-hero {
+        border: 0;
+        border-radius: 28px;
+        color: #fff;
+        background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.22), transparent 30%),
+            linear-gradient(135deg, #12324a 0%, #1f7a8c 55%, #4cb5ae 100%);
+        box-shadow: 0 24px 50px rgba(16, 24, 40, 0.16);
+        overflow: hidden;
+    }
+
+    .advance-hero .card-body {
+        padding: 1.5rem;
+    }
+
+    .advance-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .advance-title {
+        margin: 0.85rem 0 0.5rem;
+        font-size: clamp(1.6rem, 3vw, 2.4rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+    }
+
+    .advance-subtitle {
+        max-width: 66ch;
+        margin-bottom: 0;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .advance-panel {
+        border: 0;
+        border-radius: 24px;
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+    }
+
+    .advance-panel .card-header {
+        border: 0;
+        background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    }
+
+    .info-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 0.76rem;
+        font-weight: 700;
+    }
+
+    .summary-card {
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 20px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        padding: 1rem;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.55rem 0;
+        border-bottom: 1px dashed rgba(148, 163, 184, 0.25);
+    }
+
+    .summary-item:last-child {
+        border-bottom: 0;
+    }
+
+    .summary-label {
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    .summary-value {
+        font-weight: 700;
+        color: #0f172a;
+        text-align: right;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.18);
+    }
+
+    .field-help {
+        font-size: 0.82rem;
+        color: #64748b;
+    }
+
+    .error-list {
+        border-radius: 14px;
+        border: 1px solid rgba(220, 53, 69, 0.18);
+        background: #fff5f5;
+        color: #b42318;
+        padding: 0.85rem 1rem;
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 767.98px) {
+        .advance-hero .card-body {
+            padding: 1.15rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block finance_content %}
+<div class="advance-request-shell">
+    <div class="card advance-hero mb-4">
+        <div class="card-body">
+            <div class="advance-kicker">
+                <i class="bi bi-cash-stack"></i>
+                Salary advance request
+            </div>
+            <h1 class="advance-title">Request Salary Advance</h1>
+            <p class="advance-subtitle">
+                Submit an advance request with a clear repayment period. The request is routed into the same two-level approval workflow as loans.
+            </p>
+        </div>
+    </div>
+
+    {% if form.errors %}
+    <div class="error-list">
+        <strong>Please fix the errors below.</strong>
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card advance-panel">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h3 class="mb-1"><i class="bi bi-pencil-square"></i> Advance Details</h3>
+                        <div class="text-muted small">Fill in the fields below to create the request.</div>
+                    </div>
+                    <span class="info-pill">
+                        <i class="bi bi-calendar2-week"></i>
+                        Auto date: {% now "Y-m-d" %}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.amount.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-currency-dollar"></i> {{ form.amount.label }}
+                                </label>
+                                {{ form.amount }}
+                                {% if form.amount.errors %}
+                                    <div class="text-danger small mt-1">{{ form.amount.errors }}</div>
+                                {% endif %}
+                                <div class="field-help mt-1">Enter the amount in Toman.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.installment_months.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar-week"></i> {{ form.installment_months.label }}
+                                </label>
+                                {{ form.installment_months }}
+                                {% if form.installment_months.errors %}
+                                    <div class="text-danger small mt-1">{{ form.installment_months.errors }}</div>
+                                {% endif %}
+                                <div class="field-help mt-1">Choose the repayment term.</div>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="{{ form.reason.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-chat-text"></i> {{ form.reason.label }}
+                                </label>
+                                {{ form.reason }}
+                                {% if form.reason.errors %}
+                                    <div class="text-danger small mt-1">{{ form.reason.errors }}</div>
+                                {% endif %}
+                                <div class="field-help mt-1">Explain why you need the advance.</div>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-pencil"></i> {{ form.description.label }}
+                                </label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+                                {% endif %}
+                                <div class="field-help mt-1">Optional notes for the approvers.</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-send-check"></i> Submit Request
+                            </button>
+                            <a href="{% url 'finance:advance_list' %}" class="btn btn-outline-secondary px-4">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="summary-card mb-4">
+                <div class="info-pill mb-3">
+                    <i class="bi bi-info-circle"></i>
+                    Request summary
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Approval flow</span>
+                    <span class="summary-value">2 levels</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Level 1</span>
+                    <span class="summary-value">Finance Manager</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Level 2</span>
+                    <span class="summary-value">Finance Director</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Date</span>
+                    <span class="summary-value">{% now "Y-m-d" %}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Persian date</span>
+                    <span class="summary-value">{% persian_today %}</span>
+                </div>
+            </div>
+
+            <div class="card advance-panel">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="bi bi-lightbulb"></i> Before you submit</h5>
+                    <ul class="mb-0 ps-3 text-muted">
+                        <li>Choose a realistic installment period.</li>
+                        <li>Keep the reason short but clear.</li>
+                        <li>Once submitted, it goes to the approval queue immediately.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

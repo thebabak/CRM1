@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Request #{{ obj.pk }} · Company CRM{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/custom.css' %}?v=2">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="page-title mb-0">Request #{{ obj.pk }}</h1>
+  <a class="btn btn-outline-secondary" href="{% url 'request_list' %}">← Back</a>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="d-flex justify-content-between">
+      <div>
+        <div class="h5 mb-1">{{ obj.title }}</div>
+        <div class="text-muted small">
+          Created by {{ obj.created_by.username }} •
+          {% if obj.required_user %}
+            Required: targeted user (replacement) first
+          {% else %}
+            Required: {{ obj.get_required_role_display }}
+          {% endif %}
+        </div>
+      </div>
+      <div><span class="badge text-bg-secondary">{{ obj.status }}</span></div>
+    </div>
+    {% if obj.body %}<p class="mt-3 mb-0">{{ obj.body|linebreaks }}</p>{% endif %}
+  </div>
+</div>
+
+{% if obj.required_user %}
+  <div class="alert alert-info">
+    Awaiting approval from replacement:
+    <strong>{{ obj.required_user.get_full_name|default:obj.required_user.username }}</strong>
+  </div>
+{% endif %}
+
+{% if can_act %}
+  <div class="card mb-3">
+    <div class="card-header">Take Action</div>
+    <div class="card-body">
+      <form class="mb-2" method="post" action="{% url 'request_approve' obj.pk %}">
+        {% csrf_token %}
+        <textarea class="form-control mb-2" name="comment" rows="2" placeholder="Comment (optional)"></textarea>
+        <button class="btn btn-success"><i class="bi bi-check2-circle"></i> Approve</button>
+      </form>
+      <form method="post" action="{% url 'request_reject' obj.pk %}">
+        {% csrf_token %}
+        <textarea class="form-control mb-2" name="comment" rows="2" placeholder="Reason (optional)"></textarea>
+        <button class="btn btn-danger"><i class="bi bi-x-circle"></i> Reject</button>
+      </form>
+    </div>
+  </div>
+{% endif %}
+
+<div class="card">
+  <div class="card-header">Approval History</div>
+  <ul class="list-group list-group-flush">
+    {% for ap in obj.approvals.all %}
+      <li class="list-group-item">
+        <div class="d-flex justify-content-between">
+          <div>
+            <strong>{{ ap.get_decision_display }}</strong>
+            by {{ ap.decided_by.username }}
+            {% if ap.decided_role %}<span class="text-muted">({{ ap.get_decided_role_display }})</span>{% endif %}
+            {% if ap.comment %}<div class="text-muted small mt-1">{{ ap.comment }}</div>{% endif %}
+          </div>
+          <div class="text-muted small">{{ ap.decided_at }}</div>
+        </div>
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">No decisions yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

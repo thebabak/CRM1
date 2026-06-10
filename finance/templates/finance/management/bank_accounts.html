@@ -1,0 +1,30 @@
+{% extends "finance/finance_base.html" %}
+{% block title %}Bank Accounts{% endblock %}
+{% block finance_content %}
+<div class="card">
+    <div class="card-header">
+        <h3><i class="bi bi-bank"></i> Bank Accounts</h3>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Bank account management coming soon.
+        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Bank Name</th>
+                    <th>Account Number</th>
+                    <th>Type</th>
+                    <th>Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="4" class="text-center">No bank accounts added</td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn btn-primary mt-3" disabled>Add Account (Coming Soon)</button>
+    </div>
+</div>
+{% endblock %}

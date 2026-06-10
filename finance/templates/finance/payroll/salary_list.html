@@ -1,0 +1,60 @@
+{% extends "finance/finance_base.html" %}
+{% load persian_calendar %}
+{% block title %}Salaries - Payroll{% endblock %}
+
+{% block finance_content %}
+<div class="card">
+    <div class="card-header">
+        <h3><i class="bi bi-list-ul"></i> Salary List</h3>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> All registered users are automatically employees.
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Employee Code</th>
+                        <th>Employee Name</th>
+                        <th>Department</th>
+                        <th>Position</th>
+                        <th>Month/Year</th>
+                        <th>Gross Salary</th>
+                        <th>Net Salary</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for salary in salaries %}
+                    <tr>
+                        <td>{{ salary.employee.employee_code }}</td>
+                        <td>{{ salary.employee.user.get_full_name|default:salary.employee.user.username }}</td>
+                        <td>{{ salary.employee.department|default:"-" }}</td>
+                        <td>{{ salary.employee.position|default:"-" }}</td>
+                        <td>{{ salary.year }}/{{ salary.month }}</td>
+                        <td>${{ salary.gross_salary|floatformat:0 }}</td>
+                        <td>${{ salary.net_salary|floatformat:0 }}</td>
+                        <td>
+                            {% if salary.status == 'paid' %}
+                                <span class="badge bg-success">Paid</span>
+                            {% else %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">
+                            <i class="bi bi-inbox fs-1 d-block"></i>
+                            No salary records found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends "finance/finance_base.html" %}
+{% load persian_calendar %}
+{% block title %}Request Details{% endblock %}
+
+{% block finance_content %}
+<div class="card">
+    <div class="card-header {% if can_approve %}bg-primary{% else %}bg-secondary{% endif %} text-white">
+        <h3 class="mb-0">
+            <i class="bi bi-file-text"></i> 
+            Request Details - #{{ finance_request.id }}
+        </h3>
+    </div>
+    <div class="card-body">
+        <!-- Status Banner -->
+        <div class="alert alert-info mb-4">
+            <strong>Current Status:</strong> 
+            {% if finance_request.status == 'pending_level1' %}
+                <span class="badge bg-warning">Pending Level 1 - Finance Manager</span>
+            {% elif finance_request.status == 'pending_level2' %}
+                <span class="badge bg-warning">Pending Level 2 - Finance Director</span>
+            {% elif finance_request.status == 'approved' %}
+                <span class="badge bg-success">Approved</span>
+            {% elif finance_request.status == 'rejected' %}
+                <span class="badge bg-danger">Rejected</span>
+            {% else %}
+                <span class="badge bg-secondary">{{ finance_request.status }}</span>
+            {% endif %}
+        </div>
+
+        <!-- Request Info -->
+        <div class="row">
+            <div class="col-md-6">
+                <h5><i class="bi bi-info-circle"></i> Request Information</h5>
+                <table class="table table-bordered">
+                    <tr><th>Request Type</th><td>{{ finance_request.get_request_type_display }}</td></tr>
+                    <tr><th>Reference ID</th><td>#{{ finance_request.reference_id }}</td></tr>
+                    <tr><th>Current Level</th><td>Level {{ finance_request.current_level }}</td></tr>
+                    <tr><th>Created Date</th><td>{{ finance_request.created_at|date:"Y-m-d H:i" }}<br><small class="text-muted">{{ finance_request.created_at|date:"Y-m-d"|to_persian_date }}</small></td></tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h5><i class="bi bi-person-badge"></i> Applicant Information</h5>
+                {% if loan_details %}
+                <table class="table table-bordered">
+                    <tr><th>Employee Name</th><td><strong>{{ loan_details.employee.user.get_full_name|default:loan_details.employee.user.username }}</strong><br><small>Code: {{ loan_details.employee.employee_code }}</small></td></tr>
+                    <tr><th>Role / Position</th><td><span class="badge bg-info">{{ user_role }}</span></td></tr>
+                    <tr><th>Department</th><td><span class="badge bg-secondary">{{ user_department }}</span></td></tr>
+                </table>
+                {% else %}
+                <p class="text-muted">No applicant information available</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Loan Details -->
+        {% if loan_details %}
+        <div class="mt-3">
+            <h5><i class="bi bi-bank"></i> Loan Details</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr><th width="30%">Amount Requested</th><td class="text-success"><strong>{{ loan_details.amount_requested|floatformat:0 }} تومان</strong></td></tr>
+                    <tr><th>Loan Type</th><td>{{ loan_details.get_loan_type_display }}</td></tr>
+                    <tr><th>Tenure</th><td>{{ loan_details.tenure_months }} months</td></tr>
+                    <tr><th>Reason</th><td>{{ loan_details.reason|linebreaks }}</td></tr>
+                    {% if loan_details.amount_approved %}
+                    <tr><th>Amount Approved</th><td class="text-success"><strong>{{ loan_details.amount_approved|floatformat:0 }} تومان</strong></td></tr>
+                    <tr><th>Interest Rate</th><td>{{ loan_details.interest_rate }}%</td></tr>
+                    <tr><th>Monthly Installment</th><td><strong>{{ loan_details.monthly_installment|floatformat:0 }} تومان</strong></td></tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if advance_details %}
+        <div class="mt-3">
+            <h5><i class="bi bi-cash-coin"></i> Salary Advance Details</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr><th width="30%">Amount Requested</th><td class="text-success"><strong>{{ advance_details.amount|floatformat:0 }} تومان</strong></td></tr>
+                    <tr><th>Requested Date</th><td>{{ advance_details.requested_date|date:"Y-m-d" }}<br><small class="text-muted">{{ advance_details.requested_date|date:"Y-m-d"|to_persian_date }}</small></td></tr>
+                    <tr><th>Installment Period</th><td>{{ advance_details.installment_months }} months</td></tr>
+                    <tr><th>Monthly Installment</th><td><strong>{{ advance_details.monthly_installment|floatformat:0 }} تومان</strong></td></tr>
+                    <tr><th>Reason</th><td>{{ advance_details.reason|linebreaks }}</td></tr>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Approval History -->
+        <div class="mt-4">
+            <h5><i class="bi bi-clock-history"></i> Approval History</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card {% if finance_request.level1_approved_by %}border-success{% else %}border-secondary{% endif %} mb-2">
+                        <div class="card-body">
+                            <h6>Level 1 - Finance Manager</h6>
+                            {% if finance_request.level1_approved_by %}
+                                <p class="mb-0 text-success">
+                                    <i class="bi bi-check-circle"></i> Approved by {{ finance_request.level1_approved_by.get_full_name|default:finance_request.level1_approved_by.username }}
+                                    <br><small>{{ finance_request.level1_approved_at|date:"Y-m-d H:i" }}</small>
+                                </p>
+                                {% if finance_request.level1_comment %}
+                                <small class="text-muted">Comment: {{ finance_request.level1_comment }}</small>
+                                {% endif %}
+                            {% else %}
+                                <p class="text-muted mb-0"><i class="bi bi-hourglass"></i> Pending approval</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card {% if finance_request.level2_approved_by %}border-success{% else %}border-secondary{% endif %} mb-2">
+                        <div class="card-body">
+                            <h6>Level 2 - Finance Director</h6>
+                            {% if finance_request.level2_approved_by %}
+                                <p class="mb-0 text-success">
+                                    <i class="bi bi-check-circle"></i> Approved by {{ finance_request.level2_approved_by.get_full_name|default:finance_request.level2_approved_by.username }}
+                                    <br><small>{{ finance_request.level2_approved_at|date:"Y-m-d H:i" }}</small>
+                                </p>
+                                {% if finance_request.level2_comment %}
+                                <small class="text-muted">Comment: {{ finance_request.level2_comment }}</small>
+                                {% endif %}
+                            {% elif finance_request.status == 'approved' %}
+                                <p class="text-muted mb-0">Approved at Level 1</p>
+                            {% else %}
+                                <p class="text-muted mb-0"><i class="bi bi-hourglass"></i> Pending approval</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approval Form (only shown if user can approve) -->
+        {% if can_approve %}
+        <div class="mt-4">
+            <h5><i class="bi bi-pencil-square"></i> Take Action</h5>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Comments (optional)</label>
+                    <textarea name="comment" class="form-control" rows="3" placeholder="Add any comments..."></textarea>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" name="action" value="approve" class="btn btn-success">
+                        <i class="bi bi-check-lg"></i> Approve
+                    </button>
+                    <button type="submit" name="action" value="reject" class="btn btn-danger">
+                        <i class="bi bi-x-lg"></i> Reject
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Back Button -->
+        <div class="mt-4">
+            <a href="{% url 'finance:all_requests' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to All Requests
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

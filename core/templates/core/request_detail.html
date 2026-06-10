@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% load persian_calendar %}
+{% block title %}{{ obj.title }} - Request Detail{% endblock %}
+
+{% block content %}
+<div class="container-narrow mx-auto">
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="h4 mb-1">{{ obj.title }}</h2>
+                    <div class="text-muted small">
+                        <i class="bi bi-hash"></i> Request #{{ obj.pk }}
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="persian-badge">
+                        <i class="bi bi-calendar2-week"></i>
+                        {% persian_today %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body p-4">
+            <!-- Request Meta Information -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="text-muted small">Status</label>
+                        <div>
+                            {% if obj.status == "APPROVED" %}
+                                <span class="badge bg-success">✓ {{ obj.status }}</span>
+                            {% elif obj.status == "REJECTED" %}
+                                <span class="badge bg-danger">✗ {{ obj.status }}</span>
+                            {% elif obj.status == "CANCELLED" %}
+                                <span class="badge bg-secondary">⊗ {{ obj.status }}</span>
+                            {% else %}
+                                <span class="badge bg-warning">⟳ {{ obj.status }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">Created By</label>
+                        <div>{{ obj.created_by.get_full_name|default:obj.created_by.username }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">Required Role</label>
+                        <div>{{ obj.get_required_role_display }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="text-muted small">Gregorian Date</label>
+                        <div>
+                            <i class="bi bi-calendar3"></i>
+                            {{ obj.created_at|date:"Y-m-d H:i:s" }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">Persian Date</label>
+                        <div class="persian-date">
+                            <i class="bi bi-calendar2-week"></i>
+                            {{ obj.created_at|date:"Y-m-d"|to_persian_date }}
+                            {{ obj.created_at|date:"H:i:s" }}
+                        </div>
+                    </div>
+                    {% if obj.required_user %}
+                    <div class="mb-3">
+                        <label class="text-muted small">Required User</label>
+                        <div>{{ obj.required_user.get_full_name|default:obj.required_user.username }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Request Body -->
+            <div class="mb-4">
+                <label class="text-muted small">Description</label>
+                <div class="bg-light p-3 rounded-3 mt-1">
+                    {{ obj.body|linebreaks|default:"No description provided." }}
+                </div>
+            </div>
+            
+            <!-- Leave Details if applicable -->
+            {% if obj.leave %}
+            <div class="alert alert-info">
+                <h6><i class="bi bi-calendar-check"></i> Leave Details</h6>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <strong>Type:</strong> {{ obj.leave.get_leave_type_display }}<br>
+                        <strong>Mode:</strong> {{ obj.leave.get_mode_display }}
+                    </div>
+                    <div class="col-md-6">
+                        {% if obj.leave.mode == "DAILY" %}
+                            <strong>From:</strong> {{ obj.leave.daily_from|date:"Y-m-d" }}
+                            ({{ obj.leave.daily_from|date:"Y-m-d"|to_persian_date }})<br>
+                            <strong>To:</strong> {{ obj.leave.daily_to|date:"Y-m-d" }}
+                            ({{ obj.leave.daily_to|date:"Y-m-d"|to_persian_date }})<br>
+                            <strong>Duration:</strong> {{ obj.leave.duration_days }} days
+                        {% else %}
+                            <strong>Date:</strong> {{ obj.leave.hourly_date|date:"Y-m-d" }}
+                            ({{ obj.leave.hourly_date|date:"Y-m-d"|to_persian_date }})<br>
+                            <strong>Time:</strong> {{ obj.leave.hourly_from }} - {{ obj.leave.hourly_to }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Leave Stats -->
+            {% if stats %}
+            <div class="alert alert-secondary">
+                <h6><i class="bi bi-pie-chart"></i> Leave Balance ({{ stats.year }})</h6>
+                <div class="row text-center mt-2">
+                    <div class="col">
+                        <strong>Accrued:</strong> {{ stats.accrued|floatformat:1 }}
+                    </div>
+                    <div class="col">
+                        <strong>Used:</strong> {{ stats.used|floatformat:1 }}
+                    </div>
+                    <div class="col">
+                        <strong>Remaining:</strong> {{ stats.remaining|floatformat:1 }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Approvals History -->
+            {% if obj.approvals.all %}
+            <div class="mb-4">
+                <label class="text-muted small">Approval History</label>
+                <div class="mt-2">
+                    {% for approval in obj.approvals.all %}
+                    <div class="border-start border-3 border-primary ps-3 mb-2">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ approval.get_decision_display }}</strong>
+                            <small class="text-muted">{{ approval.decided_at|date:"Y-m-d H:i" }}
+                                ({{ approval.decided_at|date:"Y-m-d"|to_persian_date }})
+                            </small>
+                        </div>
+                        <div>By: {{ approval.decided_by.get_full_name|default:approval.decided_by.username }}</div>
+                        {% if approval.comment %}
+                        <div class="text-muted small">Comment: {{ approval.comment }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                <a href="{% url 'request_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                
+                {% if obj.created_by == request.user and obj.status == "DRAFT" %}
+                <form method="post" action="{% url 'request_submit' obj.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-send-check"></i> Submit
+                    </button>
+                </form>
+                <form method="post" action="{% url 'request_cancel' obj.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Cancel this request?')">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                </form>
+                {% endif %}
+                
+                {% if can_act %}
+                <div class="ms-auto">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveModal">
+                        <i class="bi bi-check-lg"></i> Approve
+                    </button>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                        <i class="bi bi-x-lg"></i> Reject
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Approve Modal -->
+{% if can_act %}
+<div class="modal fade" id="approveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'request_approve' obj.pk %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Approve Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">Comment (optional)</label>
+                    <textarea name="comment" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Confirm Approve</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'request_reject' obj.pk %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Reject Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">Reason (required)</label>
+                    <textarea name="comment" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Confirm Reject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

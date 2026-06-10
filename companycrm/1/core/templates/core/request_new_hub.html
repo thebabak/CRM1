@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}New Request · Company CRM{% endblock %}
+{% block content %}
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="page-title mb-0">New Request</h1>
+    <a class="btn btn-outline-secondary" href="{% url 'request_list' %}"><i class="bi bi-arrow-left"></i> Back</a>
+  </div>
+
+  {% if forms_list %}
+    <div class="row g-3">
+      {% for f in forms_list %}
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a class="card card-hover h-100 text-decoration-none" href="{% url f.url_name %}">
+            <div class="card-body">
+              <div class="fs-3">{{ f.icon }}</div>
+              <div class="fw-semibold mt-2">{{ f.name }}</div>
+              <div class="text-muted small">{{ f.desc }}</div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">No forms available yet.</div>
+  {% endif %}
+
+  <hr class="my-4">
+  <a class="btn btn-link" href="{% url 'request_create' %}"><i class="bi bi-file-earmark-text"></i> Freeform Request</a>
+{% endblock %}

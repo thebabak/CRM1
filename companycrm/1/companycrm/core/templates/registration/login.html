@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Sign in · ATO CRM{% endblock %}
+{% block content %}
+  <style>
+  .login-page {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 0;
+  }
+
+  .login-window {
+    width: 100%;
+    max-width: 1050px;
+    border-radius: 28px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 24px 60px rgba(15, 95, 131, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+  }
+
+  .login-window-top {
+    height: 38px;
+    background: #f1f5f9;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    gap: 8px;
+  }
+
+  .window-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #cbd5e1;
+  }
+
+  .login-left {
+    min-height: 560px;
+    background:
+      linear-gradient(135deg, rgba(21, 95, 131, 0.92), rgba(28, 57, 187, 0.80)),
+      url("{% static 'img/dramatic-cyan-smoke-background.jpg' %}");
+    background-size: cover;
+    background-position: center;
+    color: #ffffff;
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .login-brand-icon {
+    width: 62px;
+    height: 62px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    margin-bottom: 16px;
+  }
+
+  .login-brand-title {
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1.1;
+  }
+
+  .login-brand-subtitle {
+    color: rgba(255, 255, 255, 0.82);
+    margin-top: 8px;
+    max-width: 360px;
+  }
+
+  .login-feature-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .login-feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 14px;
+  }
+
+  .login-feature i {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .login-number {
+    font-size: 34px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .login-number-label {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 12px;
+  }
+
+  .login-right {
+    min-height: 560px;
+    padding: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(circle at top right, rgba(28, 57, 187, 0.08), transparent 35%),
+      #ffffff;
+  }
+
+  .login-form-box {
+    width: 100%;
+    max-width: 390px;
+  }
+
+  .login-form-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+    background: #eef2ff;
+    color: #155f83;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 16px;
+  }
+
+  .login-title {
+    font-size: 26px;
+    font-weight: 900;
+    color: #111827;
+    margin-bottom: 4px;
+  }
+
+  .login-subtitle {
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  .form-label {
+    font-weight: 700;
+    font-size: 13px;
+    color: #374151;
+  }
+
+  .form-control {
+    border-radius: 14px;
+    padding: 12px 14px;
+    border-color: #e5e7eb;
+  }
+
+  .form-control:focus {
+    border-color: #155f83;
+    box-shadow: 0 0 0 0.18rem rgba(21, 95, 131, 0.14);
+  }
+
+  .login-btn {
+    background: #155f83;
+    border-color: #155f83;
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-weight: 800;
+  }
+
+  .login-btn:hover {
+    background: #0f4f70;
+    border-color: #0f4f70;
+  }
+
+  .login-link {
+    color: #155f83;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .login-link:hover {
+    color: #0f4f70;
+    text-decoration: underline;
+  }
+
+  .login-muted-link {
+    color: #6b7280;
+    text-decoration: none;
+  }
+
+  .login-muted-link:hover {
+    color: #155f83;
+  }
+
+  .login-note {
+    text-align: center;
+    color: #6b7280;
+    font-size: 13px;
+    margin-top: 18px;
+  }
+
+  .alert {
+    border-radius: 16px;
+  }
+
+  @media (max-width: 991px) {
+    .login-left {
+      min-height: 360px;
+      padding: 34px;
+    }
+
+    .login-right {
+      min-height: auto;
+      padding: 36px 26px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .login-window {
+      border-radius: 22px;
+    }
+
+    .login-left {
+      padding: 28px;
+    }
+
+    .login-brand-title {
+      font-size: 24px;
+    }
+
+    .login-number {
+      font-size: 28px;
+    }
+  }
+  </style>
+  <div class="login-page">
+    <div class="login-window">
+      <div class="login-window-top">
+        <span class="window-dot"></span>
+        <span class="window-dot"></span>
+        <span class="window-dot"></span>
+      </div>
+      <div class="row g-0">
+        <div class="col-lg-5">
+          <div class="login-left">
+            <div>
+              <div class="login-brand-icon">
+                <i class="bi bi-diagram-3-fill"></i>
+              </div>
+              <div class="login-brand-title">ATO CRM</div>
+              <div class="login-brand-subtitle">Secure company request management, approval workflows, and leave tracking.</div>
+            </div>
+            <div class="login-feature-list">
+              <div class="login-feature">
+                <i class="bi bi-check2"></i>
+                Role-based approval workflow
+              </div>
+              <div class="login-feature">
+                <i class="bi bi-check2"></i>
+                Leave balance and request tracking
+              </div>
+              <div class="login-feature">
+                <i class="bi bi-check2"></i>
+                Secure staff access control
+              </div>
+            </div>
+            <div>
+              <div class="login-number">2026</div>
+              <div class="login-number-label">Company Request Management System</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="login-right">
+            <div class="login-form-box">
+              <div class="login-form-icon">
+                <i class="bi bi-box-arrow-in-right"></i>
+              </div>
+              <h1 class="login-title">Sign in</h1>
+              <div class="login-subtitle">Welcome back. Please enter your account details.</div>
+              {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                  <i class="bi bi-exclamation-triangle me-1"></i>
+                  Invalid username or password. Please try again.
+                </div>
+              {% endif %}
+              {% if form.non_field_errors %}
+                <div class="alert alert-warning" role="alert">{{ form.non_field_errors }}</div>
+              {% endif %}
+              <form method="post"
+                    action="{% url 'login' %}"
+                    class="needs-validation"
+                    novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label for="id_username" class="form-label">Username</label>
+                  <input type="text"
+                         name="username"
+                         autofocus
+                         required
+                         id="id_username"
+                         class="form-control"
+                         placeholder="your.username">
+                  <div class="invalid-feedback">Please enter your username.</div>
+                </div>
+                <div class="mb-2">
+                  <label for="id_password" class="form-label">Password</label>
+                  <input type="password"
+                         name="password"
+                         required
+                         id="id_password"
+                         class="form-control"
+                         placeholder="••••••••">
+                  <div class="invalid-feedback">Please enter your password.</div>
+                </div>
+                <input type="hidden" name="next" value="{{ next }}">
+                <div class="d-grid gap-2 mt-4">
+                  <button class="btn btn-primary login-btn" type="submit">
+                    Log in
+                    <i class="bi bi-arrow-right ms-1"></i>
+                  </button>
+                </div>
+              </form>
+              <div class="d-flex justify-content-between mt-3">
+                <a class="small login-link" href="{% url 'password_reset' %}">Forgot password?</a>
+                <a class="small login-muted-link" href="{% url 'home' %}">← Back to home</a>
+              </div>
+              <div class="login-note">Need access? Ask an admin to create your account.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block scripts %}
+  <script>
+  (() => {
+    const forms = document.querySelectorAll('.needs-validation');
+
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
+  </script>
+{% endblock %}

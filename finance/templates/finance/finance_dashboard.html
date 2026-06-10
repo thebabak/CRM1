@@ -1,0 +1,80 @@
+{% extends "finance/finance_base.html" %}
+{% load persian_calendar %}
+{% block title %}Financial Management - Finance{% endblock %}
+
+{% block finance_content %}
+<div class="card">
+    <div class="card-header bg-success text-white">
+        <h3 class="mb-0">
+            <i class="bi bi-graph-up"></i> Financial Management Dashboard
+        </h3>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Welcome to the Financial Management System
+            <br>
+            <small>
+                <i class="bi bi-calendar3"></i> Gregorian: {% now "Y-m-d" %} | 
+                <i class="bi bi-calendar2-week"></i> Persian: {% persian_today %}
+            </small>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card text-center bg-danger text-white">
+                    <div class="card-body">
+                        <i class="bi bi-receipt fs-1"></i>
+                        <h3>$0</h3>
+                        <p>Total Expenses (This Year)</p>
+                        <small>Year {% now "Y" %} / {% persian_year %}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body">
+                        <i class="bi bi-wallet2 fs-1"></i>
+                        <h3>$0</h3>
+                        <p>Total Income (This Year)</p>
+                        <small>Year {% now "Y" %} / {% persian_year %}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="bi bi-graph-up fs-1"></i>
+                        <h3>$0</h3>
+                        <p>Net Profit</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Yearly Summary with Persian Calendar -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <strong>Yearly Summary</strong>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Gregorian Year: {% now "Y" %}</h6>
+                                <h6>Persian Year: {% persian_year %}</h6>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-calendar2-week"></i> Updated: {% persian_today %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

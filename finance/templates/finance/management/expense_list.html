@@ -1,0 +1,37 @@
+{% extends "finance/finance_base.html" %}
+{% load persian_calendar %}
+{% block title %}Expenses{% endblock %}
+{% block finance_content %}
+<div class="card">
+    <div class="card-header">
+        <h3><i class="bi bi-receipt"></i> Expense List</h3>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Expense tracking feature coming soon.
+        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Date (Gregorian)</th>
+                    <th>Date (Persian)</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Payment Method</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="6" class="text-center">No expenses recorded</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="mt-2">
+            <small class="text-muted">
+                <i class="bi bi-calendar2-week"></i> Persian dates are automatically converted from Gregorian dates
+            </small>
+        </div>
+    </div>
+</div>
+{% endblock %}

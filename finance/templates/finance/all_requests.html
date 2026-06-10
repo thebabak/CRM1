@@ -1,0 +1,485 @@
+{% extends "finance/finance_base.html" %}
+{% load persian_calendar %}
+{% block title %}All Requests - Finance{% endblock %}
+
+{% block finance_content %}
+<section class="requests-hero mb-4">
+    <div class="requests-hero__content">
+        <div>
+            <p class="requests-kicker mb-2">Finance Workflow</p>
+            <h2 class="requests-title mb-2"><i class="bi bi-list-check"></i> All Requests</h2>
+            <p class="requests-subtitle mb-0">Track approvals, monitor status, and review every submission in one place.</p>
+        </div>
+        <div class="requests-hero__actions">
+            <button class="btn btn-light btn-sm" onclick="location.reload()">
+                <i class="bi bi-arrow-repeat"></i> Refresh
+            </button>
+            <a href="{% url 'finance:loan_request' %}" class="btn btn-warning btn-sm">
+                <i class="bi bi-plus-circle"></i> New Loan Request
+            </a>
+        </div>
+    </div>
+</section>
+
+<div class="row g-3 mb-3 stats-grid">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card stat-card--all">
+            <span class="stat-label">Total</span>
+            <span class="stat-value" id="count-all">{{ requests|length }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card stat-card--pending">
+            <span class="stat-label">Pending</span>
+            <span class="stat-value" id="count-pending">0</span>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card stat-card--approved">
+            <span class="stat-label">Approved</span>
+            <span class="stat-value" id="count-approved">0</span>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card stat-card--rejected">
+            <span class="stat-label">Rejected</span>
+            <span class="stat-value" id="count-rejected">0</span>
+        </div>
+    </div>
+</div>
+
+<div class="card requests-panel">
+    <div class="card-body">
+        <div class="toolbar mb-3">
+            <div class="filter-chips" role="group" aria-label="Request filter chips">
+                <button type="button" class="chip chip--active" data-filter="all" onclick="filterTable('all', this)">All</button>
+                <button type="button" class="chip" data-filter="pending" onclick="filterTable('pending', this)">Pending</button>
+                <button type="button" class="chip" data-filter="approved" onclick="filterTable('approved', this)">Approved</button>
+                <button type="button" class="chip" data-filter="rejected" onclick="filterTable('rejected', this)">Rejected</button>
+            </div>
+            <div class="search-wrap">
+                <i class="bi bi-search"></i>
+                <input
+                    id="requestSearch"
+                    type="text"
+                    class="form-control"
+                    placeholder="Search by employee, code, role, department, or amount"
+                    oninput="applyFilters()"
+                >
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table requests-table align-middle" id="requestsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Type</th>
+                        <th>Employee</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Approved By</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr
+                        class="request-row"
+                        data-status="{{ req.status_text }}"
+                        data-search="{{ req.employee_name|lower }} {{ req.employee_code|lower }} {{ req.role|default:'-'|lower }} {{ req.department|default:'-'|lower }} {{ req.amount|lower }} {{ req.type|lower }}"
+                        data-url="{% url 'finance:approve_request' req.id %}"
+                        tabindex="0"
+                    >
+                        <td><span class="row-id">#{{ req.id }}</span></td>
+                        <td>
+                            <span class="type-pill">{{ req.type_icon }} {{ req.type }}</span>
+                        </td>
+                        <td>
+                            <div class="employee-name">{{ req.employee_name }}</div>
+                            <small class="text-muted">{{ req.employee_code }}</small>
+                        </td>
+                        <td>{{ req.role|default:"-" }}</td>
+                        <td>{{ req.department|default:"-" }}</td>
+                        <td>
+                            <div class="amount">{{ req.amount }} تومان</div>
+                        </td>
+                        <td>
+                            <div>{{ req.request_date|date:"Y-m-d" }}</div>
+                            <small class="text-muted">{{ req.request_date|date:"H:i" }} | {{ req.request_date|date:"Y-m-d"|to_persian_date }}</small>
+                        </td>
+                        <td>{{ req.status_badge|safe }}</td>
+                        <td>{{ req.approved_by }}</td>
+                        <td>
+                            <a href="{% url 'finance:approve_request' req.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> Details
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center py-5">
+                            <i class="bi bi-inbox fs-1 d-block text-muted"></i>
+                            <h5 class="mt-3">No requests found</h5>
+                            <p class="text-muted mb-3">No finance requests have been submitted yet.</p>
+                            <a href="{% url 'finance:loan_request' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Request a Loan
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+let activeFilter = 'all';
+
+function matchesStatus(statusValue, filter) {
+    if (filter === 'all') {
+        return true;
+    }
+    if (filter === 'pending') {
+        return statusValue && statusValue.startsWith('pending');
+    }
+    return statusValue === filter;
+}
+
+function filterTable(filter, clickedButton) {
+    activeFilter = filter;
+
+    document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('chip--active'));
+    if (clickedButton) {
+        clickedButton.classList.add('chip--active');
+    } else {
+        const selected = document.querySelector(`.chip[data-filter="${filter}"]`);
+        if (selected) {
+            selected.classList.add('chip--active');
+        }
+    }
+
+    applyFilters();
+}
+
+function applyFilters() {
+    const searchInput = document.getElementById('requestSearch');
+    const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+    const rows = document.querySelectorAll('#requestsTable tbody .request-row');
+
+    rows.forEach(row => {
+        const statusValue = row.getAttribute('data-status') || '';
+        const searchValue = row.getAttribute('data-search') || '';
+
+        const statusMatch = matchesStatus(statusValue, activeFilter);
+        const searchMatch = !query || searchValue.includes(query);
+
+        row.style.display = (statusMatch && searchMatch) ? '' : 'none';
+    });
+}
+
+function updateCounters() {
+    const rows = document.querySelectorAll('#requestsTable tbody .request-row');
+    let pending = 0;
+    let approved = 0;
+    let rejected = 0;
+
+    rows.forEach(row => {
+        const status = row.getAttribute('data-status') || '';
+        if (status.startsWith('pending')) {
+            pending += 1;
+        } else if (status === 'approved') {
+            approved += 1;
+        } else if (status === 'rejected') {
+            rejected += 1;
+        }
+    });
+
+    const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.textContent = value;
+        }
+    };
+
+    setText('count-pending', pending);
+    setText('count-approved', approved);
+    setText('count-rejected', rejected);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    updateCounters();
+    filterTable('all');
+
+    document.querySelectorAll('.request-row').forEach(row => {
+        row.addEventListener('click', function (event) {
+            const clickedInteractive = event.target.closest('a, button, input, textarea, select, label');
+            if (clickedInteractive) {
+                return;
+            }
+
+            const url = row.getAttribute('data-url');
+            if (url) {
+                window.location.href = url;
+            }
+        });
+
+        row.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+                return;
+            }
+
+            event.preventDefault();
+            const url = row.getAttribute('data-url');
+            if (url) {
+                window.location.href = url;
+            }
+        });
+    });
+});
+</script>
+
+<style>
+    .requests-hero {
+        background: linear-gradient(130deg, #17324d 0%, #1f4e79 52%, #2b7ea1 100%);
+        border-radius: 16px;
+        box-shadow: 0 14px 30px rgba(21, 52, 78, 0.25);
+        color: #ffffff;
+        overflow: hidden;
+    }
+
+    .requests-hero__content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 1rem;
+        padding: 1.4rem;
+        background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 40%);
+    }
+
+    .requests-kicker {
+        font-size: 0.78rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.9;
+    }
+
+    .requests-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .requests-subtitle {
+        opacity: 0.92;
+    }
+
+    .requests-hero__actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .stats-grid .stat-card {
+        border-radius: 14px;
+        padding: 0.9rem 1rem;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid transparent;
+        min-height: 82px;
+    }
+
+    .stat-label {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.85;
+    }
+
+    .stat-value {
+        font-size: 1.45rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .stat-card--all {
+        background: #eef3f7;
+        color: #17324d;
+        border-color: #d8e3ed;
+    }
+
+    .stat-card--pending {
+        background: #fff7e0;
+        color: #9a6200;
+        border-color: #f8df9f;
+    }
+
+    .stat-card--approved {
+        background: #e9f8ee;
+        color: #14763a;
+        border-color: #b8e7c6;
+    }
+
+    .stat-card--rejected {
+        background: #fdeff0;
+        color: #9f2230;
+        border-color: #f7c5ca;
+    }
+
+    .requests-panel {
+        border: 0;
+        border-radius: 16px;
+        box-shadow: 0 8px 26px rgba(30, 58, 85, 0.08);
+    }
+
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.9rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-chips {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .chip {
+        border: 1px solid #d5dde6;
+        background: #f8fafc;
+        color: #2a4056;
+        border-radius: 999px;
+        padding: 0.35rem 0.85rem;
+        font-size: 0.87rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .chip:hover {
+        background: #edf3f8;
+        border-color: #b9cde0;
+    }
+
+    .chip--active {
+        background: #184e77;
+        border-color: #184e77;
+        color: #ffffff;
+    }
+
+    .search-wrap {
+        min-width: 250px;
+        max-width: 360px;
+        width: 100%;
+        position: relative;
+    }
+
+    .search-wrap i {
+        position: absolute;
+        left: 0.78rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7f92;
+    }
+
+    .search-wrap .form-control {
+        padding-left: 2.2rem;
+        border-radius: 999px;
+        border: 1px solid #d4dde7;
+    }
+
+    .requests-table thead th {
+        background: #f0f5fa;
+        color: #34495d;
+        border: 0;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .requests-table tbody td {
+        border-top: 1px solid #edf1f5;
+        vertical-align: middle;
+    }
+
+    .requests-table tbody tr {
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    }
+
+    .requests-table tbody tr:hover {
+        background-color: #f9fcff;
+        transform: translateY(-1px);
+        box-shadow: inset 4px 0 0 #2b7ea1;
+    }
+
+    .requests-table tbody tr.request-row {
+        cursor: pointer;
+    }
+
+    .requests-table tbody tr.request-row:focus {
+        outline: 2px solid #2b7ea1;
+        outline-offset: -2px;
+    }
+
+    .row-id {
+        display: inline-block;
+        font-weight: 700;
+        color: #1d3c59;
+        background: #ecf3f9;
+        border-radius: 999px;
+        padding: 0.2rem 0.6rem;
+    }
+
+    .type-pill {
+        display: inline-block;
+        padding: 0.26rem 0.65rem;
+        border-radius: 999px;
+        background: #f2f7fb;
+        color: #1f4c6a;
+        border: 1px solid #d3e2ef;
+        font-weight: 600;
+        font-size: 0.86rem;
+    }
+
+    .employee-name {
+        font-weight: 600;
+        color: #1f3142;
+    }
+
+    .amount {
+        color: #14763a;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .requests-table :is(.badge) {
+        border-radius: 999px;
+        padding: 0.45rem 0.7rem;
+        font-size: 0.74rem;
+        letter-spacing: 0.01em;
+    }
+
+    @media (max-width: 992px) {
+        .requests-hero__content {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .requests-title {
+            font-size: 1.25rem;
+        }
+
+        .search-wrap {
+            max-width: 100%;
+        }
+
+        .requests-table {
+            min-width: 980px;
+        }
+    }
+</style>
+{% endblock %}

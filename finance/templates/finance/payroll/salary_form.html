@@ -1,0 +1,41 @@
+{% extends "finance/finance_base.html" %}
+{% block title %}Create Salary{% endblock %}
+{% block finance_content %}
+<div class="card">
+    <div class="card-header">
+        <h3><i class="bi bi-plus-circle"></i> Create Salary Record</h3>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> This feature is under development.
+        </div>
+        <form>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Employee</label>
+                    <select class="form-select">
+                        <option>Select employee...</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label>Month</label>
+                    <select class="form-select">
+                        <option>1 - January</option>
+                        <option>2 - February</option>
+                        <option>3 - March</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label>Year</label>
+                    <select class="form-select">
+                        <option>2024</option>
+                        <option>2025</option>
+                        <option>2026</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary" disabled>Save (Coming Soon)</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

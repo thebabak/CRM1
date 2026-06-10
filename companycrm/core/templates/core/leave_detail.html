@@ -1,0 +1,22 @@
+<h1>Leave Request — {{ obj.title }}</h1>
+<p>Status: <b>{{ obj.status }}</b> | Required role: <b>{{ obj.get_required_role_display }}</b></p>
+
+{% if leave %}
+  <h3>Employee</h3>
+  <p>Name: {{ leave.full_name }} | Position: {{ leave.position }} | Personnel Code: {{ leave.personnel_code }}</p>
+
+  <h3>Leave Info</h3>
+  <p>Type: {{ leave.get_leave_type_display }} | Mode: {{ leave.get_mode_display }}</p>
+  {% if leave.mode == "DAILY" %}
+    <p>From: {{ leave.daily_from }} To: {{ leave.daily_to }} | Duration: {{ leave.duration_days }} day(s)</p>
+  {% else %}
+    <p>Date: {{ leave.hourly_date }} From: {{ leave.hourly_from }} To: {{ leave.hourly_to }}</p>
+  {% endif %}
+  {% if leave.replacement %}<p>Replacement: {{ leave.replacement.username }}</p>{% endif %}
+  {% if leave.remaining_monthly_days %}<p>Remaining monthly leave (HR): {{ leave.remaining_monthly_days }}</p>{% endif %}
+{% else %}
+  <p>No leave details found.</p>
+{% endif %}
+
+<hr>
+{% include "core/request_detail.html" with obj=obj only %}

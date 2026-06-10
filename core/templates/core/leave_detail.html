@@ -1,0 +1,525 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Leave Request #{{ obj.pk }} · Company CRM{% endblock %}
+{% block content %}
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=2">
+  <style>
+  .leave-detail-page {
+    max-width: 1050px;
+    margin: 0 auto;
+  }
+
+  .leave-hero {
+    border: 0;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 55%, #ffffff 100%);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+
+  .leave-card {
+    border: 0;
+    border-radius: 22px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+    overflow: hidden;
+  }
+
+  .leave-card-header {
+    background: #ffffff;
+    border-bottom: 1px solid #eef0f3;
+    padding: 20px 24px;
+  }
+
+  .leave-card-body {
+    padding: 24px;
+  }
+
+  .section-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #111827;
+  }
+
+  .section-subtitle {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 3px;
+  }
+
+  .icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 16px;
+    background: #eef2ff;
+    color: #0d6efd;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+    flex-shrink: 0;
+  }
+
+  .meta-pill {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    padding: 7px 13px;
+    font-size: 13px;
+    color: #4b5563;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-badge {
+    font-size: 13px;
+    padding: 9px 15px;
+    border-radius: 999px;
+    letter-spacing: 0.2px;
+  }
+
+  .info-box {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 16px;
+    height: 100%;
+  }
+
+  .info-label {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 4px;
+  }
+
+  .info-value {
+    font-size: 15px;
+    font-weight: 800;
+    color: #111827;
+  }
+
+  .balance-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 18px;
+    height: 100%;
+    background: #ffffff;
+  }
+
+  .balance-label {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 5px;
+  }
+
+  .balance-value {
+    font-size: 30px;
+    font-weight: 900;
+    line-height: 1;
+    color: #111827;
+  }
+
+  .balance-unit {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 5px;
+  }
+
+  .soft-panel {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 16px;
+  }
+
+  .approval-item {
+    padding: 16px 20px;
+  }
+
+  .decision-pill {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 5px 11px;
+    font-size: 12px;
+    font-weight: 800;
+    background: #f1f5f9;
+  }
+
+  .comment-box {
+    background: #f8fafc;
+    border-left: 3px solid #adb5bd;
+    padding: 9px 11px;
+    border-radius: 10px;
+  }
+
+  .empty-box {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 18px;
+    padding: 24px;
+    color: #64748b;
+  }
+
+  .btn-pill {
+    border-radius: 999px;
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+  </style>
+  <div class="leave-detail-page">
+    <div class="card leave-hero mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+          <div>
+            <div class="text-muted small mb-2">
+              <i class="bi bi-calendar-check me-1"></i>
+              Leave Request Details
+            </div>
+            <h1 class="page-title mb-1">Leave Request #{{ obj.pk }}</h1>
+            <div class="text-muted">Review leave information, applicant details, balance summary, and approval history.</div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <span class="meta-pill">
+                <i class="bi bi-person"></i>
+                Created by <strong>{{ obj.created_by.username }}</strong>
+              </span>
+              <span class="meta-pill">
+                <i class="bi bi-calendar-event"></i>
+                {{ obj.created_at|date:"d M Y, H:i" }}
+              </span>
+              <span class="meta-pill">
+                <i class="bi bi-shield-check"></i>
+                {% if obj.required_user %}
+                  Required: <strong>Targeted user first</strong>
+                {% else %}
+                  Required: <strong>{{ obj.get_required_role_display }}</strong>
+                {% endif %}
+              </span>
+            </div>
+          </div>
+          <div class="d-flex flex-column align-items-end gap-2">
+            {% if obj.status == "APPROVED" or obj.status == "APPROVE" %}
+              <span class="badge text-bg-success status-badge">
+                <i class="bi bi-check-circle me-1"></i>{{ obj.status }}
+              </span>
+            {% elif obj.status == "REJECTED" or obj.status == "REJECT" %}
+              <span class="badge text-bg-danger status-badge">
+                <i class="bi bi-x-circle me-1"></i>{{ obj.status }}
+              </span>
+            {% elif obj.status == "CANCELLED" or obj.status == "CANCELED" %}
+              <span class="badge text-bg-secondary status-badge">
+                <i class="bi bi-x-octagon me-1"></i>{{ obj.status }}
+              </span>
+            {% else %}
+              <span class="badge text-bg-dark status-badge">
+                <i class="bi bi-clock-history me-1"></i>{{ obj.status }}
+              </span>
+            {% endif %}
+            <a href="{% url 'request_list' %}"
+               class="btn btn-outline-secondary btn-sm btn-pill">
+              <i class="bi bi-arrow-left me-1"></i>
+              Back to Requests
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% if leave %}
+      <div class="card leave-card mb-4">
+        <div class="leave-card-header">
+          <div class="d-flex align-items-center gap-3">
+            <div class="icon-box">
+              <i class="bi bi-person-vcard"></i>
+            </div>
+            <div>
+              <div class="section-title">Employee Information</div>
+              <div class="section-subtitle">Applicant details recorded for this leave request.</div>
+            </div>
+          </div>
+        </div>
+        <div class="leave-card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="info-box">
+                <div class="info-label">Full Name</div>
+                <div class="info-value">{{ leave.full_name|default:"-" }}</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="info-box">
+                <div class="info-label">Position</div>
+                <div class="info-value">{{ leave.position|default:"-" }}</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="info-box">
+                <div class="info-label">Personnel Code</div>
+                <div class="info-value">{{ leave.personnel_code|default:"-" }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card leave-card mb-4">
+        <div class="leave-card-header">
+          <div class="d-flex align-items-center gap-3">
+            <div class="icon-box">
+              <i class="bi bi-calendar-range"></i>
+            </div>
+            <div>
+              <div class="section-title">Leave Details</div>
+              <div class="section-subtitle">Requested leave type, mode, duration, and replacement.</div>
+            </div>
+          </div>
+        </div>
+        <div class="leave-card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="info-box">
+                <div class="info-label">Leave Type</div>
+                <div class="info-value">{{ leave.get_leave_type_display }}</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="info-box">
+                <div class="info-label">Mode</div>
+                <div class="info-value">{{ leave.get_mode_display }}</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="info-box">
+                <div class="info-label">Requested Duration</div>
+                <div class="info-value">
+                  {% if leave.mode == "DAILY" %}
+                    {{ leave.duration_days|default:"-" }} day(s)
+                  {% else %}
+                    Hourly Leave
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+          {% if leave.mode == "DAILY" %}
+            <div class="soft-panel mt-4">
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-calendar-day text-primary"></i>
+                <div class="fw-bold">Daily Leave Period</div>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="info-box bg-white">
+                    <div class="info-label">From Date</div>
+                    <div class="info-value">{{ leave.daily_from|date:"d M Y" }}</div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-box bg-white">
+                    <div class="info-label">To Date</div>
+                    <div class="info-value">{{ leave.daily_to|date:"d M Y" }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <div class="soft-panel mt-4">
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-clock text-primary"></i>
+                <div class="fw-bold">Hourly Leave Period</div>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="info-box bg-white">
+                    <div class="info-label">Date</div>
+                    <div class="info-value">{{ leave.hourly_date|date:"d M Y" }}</div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="info-box bg-white">
+                    <div class="info-label">From Time</div>
+                    <div class="info-value">{{ leave.hourly_from|time:"H:i" }}</div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="info-box bg-white">
+                    <div class="info-label">To Time</div>
+                    <div class="info-value">{{ leave.hourly_to|time:"H:i" }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+          <div class="row g-3 mt-1">
+            <div class="col-md-6">
+              <div class="info-box">
+                <div class="info-label">Replacement</div>
+                <div class="info-value">
+                  {% if leave.replacement %}
+                    {{ leave.replacement.get_full_name|default:leave.replacement.username }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-box">
+                <div class="info-label">Remaining Monthly Leave by HR</div>
+                <div class="info-value">
+                  {% if leave.remaining_monthly_days %}
+                    {{ leave.remaining_monthly_days }} day(s)
+                  {% else %}
+                    -
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="empty-box mb-4">
+        <i class="bi bi-info-circle me-1"></i>
+        No leave details found for this request.
+      </div>
+    {% endif %}
+    {% if stats %}
+      <div class="card leave-card mb-4">
+        <div class="leave-card-header">
+          <div class="d-flex align-items-center gap-3">
+            <div class="icon-box">
+              <i class="bi bi-calendar2-check"></i>
+            </div>
+            <div>
+              <div class="section-title">Leave Balance Summary</div>
+              <div class="section-subtitle">
+                Applicant: {{ obj.created_by.get_full_name|default:obj.created_by.username }} · Year: {{ stats.year }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="leave-card-body">
+          <div class="row g-3">
+            <div class="col-6 col-lg-3">
+              <div class="balance-card">
+                <div class="balance-label">Accrued</div>
+                <div class="balance-value">{{ stats.accrued }}</div>
+                <div class="balance-unit">day(s)</div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="balance-card">
+                <div class="balance-label">Approved / Used</div>
+                <div class="balance-value text-success">
+                  {% if stats.approved_days %}
+                    {{ stats.approved_days }}
+                  {% else %}
+                    {{ stats.used }}
+                  {% endif %}
+                </div>
+                <div class="balance-unit">day(s)</div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="balance-card">
+                <div class="balance-label">Pending</div>
+                <div class="balance-value text-dark">
+                  {% if stats.pending_days %}
+                    {{ stats.pending_days }}
+                  {% else %}
+                    0
+                  {% endif %}
+                </div>
+                <div class="balance-unit">day(s)</div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="balance-card">
+                <div class="balance-label">Remaining</div>
+                <div class="balance-value text-primary">{{ stats.remaining }}</div>
+                <div class="balance-unit">day(s)</div>
+              </div>
+            </div>
+          </div>
+          <div class="row g-3 mt-1">
+            <div class="col-md-6">
+              <div class="soft-panel d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                  <i class="bi bi-x-circle me-1"></i>
+                  Rejected Days
+                </div>
+                <div class="fw-bold text-danger">
+                  {% if stats.rejected_days %}
+                    {{ stats.rejected_days }}
+                  {% else %}
+                    0
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="soft-panel d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                  <i class="bi bi-x-octagon me-1"></i>
+                  Cancelled Days
+                </div>
+                <div class="fw-bold text-secondary">
+                  {% if stats.cancelled_days %}
+                    {{ stats.cancelled_days }}
+                  {% else %}
+                    0
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    {% if obj.required_user %}
+      <div class="alert alert-info border-0 rounded-4 shadow-sm mb-4">
+        <i class="bi bi-info-circle me-1"></i>
+        Awaiting approval from replacement:
+        <strong>{{ obj.required_user.get_full_name|default:obj.required_user.username }}</strong>
+      </div>
+    {% endif %}
+    <div class="card leave-card mb-4">
+      <div class="leave-card-header">
+        <div class="d-flex align-items-center gap-3">
+          <div class="icon-box">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <div>
+            <div class="section-title">Approval History</div>
+            <div class="section-subtitle">All decisions made for this leave request.</div>
+          </div>
+        </div>
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for ap in obj.approvals.all %}
+          <li class="list-group-item approval-item">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+              <div>
+                <span class="decision-pill">{{ ap.get_decision_display }}</span>
+                <span class="ms-2">
+                  by <strong>{{ ap.decided_by.username }}</strong>
+                </span>
+                {% if ap.decided_role %}<span class="text-muted small">({{ ap.get_decided_role_display }})</span>{% endif %}
+                {% if ap.comment %}<div class="comment-box text-muted small mt-3">{{ ap.comment }}</div>{% endif %}
+              </div>
+              <div class="text-muted small">
+                <i class="bi bi-calendar-check me-1"></i>
+                {{ ap.decided_at|date:"d M Y, H:i" }}
+              </div>
+            </div>
+          </li>
+        {% empty %}
+          <li class="list-group-item p-4">
+            <div class="empty-box">
+              <i class="bi bi-hourglass-split me-1"></i>
+              No decisions yet.
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

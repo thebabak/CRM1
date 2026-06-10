@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Letter{% endblock %}
+
+{% block content %}
+<style>
+  .form-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+  
+  .form-header {
+    background: linear-gradient(135deg, #1C39BB 0%, #155f83 100%);
+    color: white;
+    padding: 2rem;
+  }
+  
+  .form-body {
+    padding: 2rem;
+  }
+  
+  .form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+  }
+  
+  .btn-send {
+    background: #1C39BB;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  
+  .btn-send:hover {
+    background: #155f83;
+    transform: translateY(-2px);
+  }
+  
+  .btn-cancel {
+    background: #6c757d;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  
+  .btn-cancel:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+  }
+</style>
+
+<div class="container">
+  <div class="form-card">
+    <div class="form-header">
+      <h2 style="color: white; margin-bottom: 0;">
+        <i class="bi bi-pencil-square me-2"></i>
+        {{ action }} Letter
+      </h2>
+    </div>
+    
+    <div class="form-body">
+      <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+          <div class="mb-4">
+            <label for="{{ field.id_for_label }}" class="form-label">
+              {{ field.label }}
+              {% if field.field.required %}
+                <span class="text-danger">*</span>
+              {% endif %}
+            </label>
+            {{ field }}
+            {% if field.help_text %}
+              <div class="help-text text-muted small mt-1">{{ field.help_text }}</div>
+            {% endif %}
+            {% if field.errors %}
+              <div class="text-danger small mt-1">
+                {{ field.errors }}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+        
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" class="btn btn-send text-white">
+            <i class="bi bi-send me-1"></i> Send Letter
+          </button>
+          <a href="/letters/" class="btn btn-cancel text-white">
+            <i class="bi bi-x-circle me-1"></i> Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

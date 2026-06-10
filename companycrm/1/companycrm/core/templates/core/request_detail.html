@@ -1,0 +1,568 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Request #{{ obj.pk }} · Company CRM{% endblock %}
+{% block content %}
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=2">
+  <style>
+  .request-page {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  .hero-card {
+    position: relative;
+    overflow: hidden;
+    border: 0;
+    border-radius: 26px;
+    background:
+      radial-gradient(circle at top right, rgba(13, 110, 253, 0.14), transparent 34%),
+      linear-gradient(135deg, #f8fafc 0%, #eef2ff 48%, #ffffff 100%);
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.10);
+  }
+
+  .hero-card::after {
+    content: "";
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    right: -80px;
+    bottom: -90px;
+    border-radius: 50%;
+    background: rgba(13, 110, 253, 0.08);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .glass-card {
+    border: 0;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+
+  .card-soft-header {
+    background: #ffffff;
+    border-bottom: 1px solid #eef0f3;
+    padding: 20px 24px;
+  }
+
+  .card-soft-body {
+    padding: 24px;
+  }
+
+  .section-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #111827;
+  }
+
+  .section-subtitle {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 3px;
+  }
+
+  .icon-box {
+    width: 46px;
+    height: 46px;
+    border-radius: 17px;
+    background: #eef2ff;
+    color: #0d6efd;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .meta-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .meta-pill {
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: #4b5563;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-badge {
+    font-size: 13px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    letter-spacing: 0.2px;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.10);
+  }
+
+  .description-box {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 18px;
+    color: #4b5563;
+  }
+
+  .stat-card {
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 22px;
+    padding: 18px;
+    height: 100%;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+  }
+
+  .stat-card::after {
+    content: "";
+    position: absolute;
+    width: 74px;
+    height: 74px;
+    right: -28px;
+    top: -28px;
+    border-radius: 50%;
+    background: rgba(13, 110, 253, 0.08);
+  }
+
+  .stat-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 14px;
+    background: #f1f5f9;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    color: #0d6efd;
+  }
+
+  .stat-label {
+    color: #6b7280;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 30px;
+    font-weight: 900;
+    line-height: 1;
+    color: #111827;
+  }
+
+  .stat-unit {
+    color: #9ca3af;
+    font-size: 12px;
+    margin-top: 5px;
+  }
+
+  .cancel-card {
+    border: 0;
+    border-radius: 24px;
+    background:
+      radial-gradient(circle at top left, rgba(220, 53, 69, 0.10), transparent 32%),
+      #fff8f8;
+    box-shadow: 0 12px 30px rgba(220, 53, 69, 0.08);
+  }
+
+  .cancel-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 18px;
+    background: #ffe3e3;
+    color: #dc3545;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .alert-modern {
+    border: 0;
+    border-radius: 20px;
+    box-shadow: 0 10px 26px rgba(13, 110, 253, 0.08);
+  }
+
+  .action-card {
+    border: 0;
+    border-radius: 24px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+
+  .action-panel {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 18px;
+  }
+
+  .form-label {
+    font-weight: 700;
+    font-size: 13px;
+    color: #374151;
+  }
+
+  .history-card {
+    border: 0;
+    border-radius: 24px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+
+  .approval-item {
+    padding: 18px 24px;
+  }
+
+  .decision-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 800;
+    background: #f1f5f9;
+    color: #111827;
+  }
+
+  .comment-box {
+    background: #f8fafc;
+    border-left: 4px solid #adb5bd;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+
+  .empty-history {
+    margin: 0;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 18px;
+    padding: 22px;
+    color: #64748b;
+  }
+
+  .btn-pill {
+    border-radius: 999px;
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  @media (max-width: 767px) {
+    .stat-value {
+      font-size: 25px;
+    }
+
+    .card-soft-body,
+    .card-soft-header {
+      padding: 18px;
+    }
+  }
+  </style>
+  <div class="request-page">
+    <div class="card hero-card mb-4">
+      <div class="card-body p-4 hero-content">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+          <div>
+            <div class="text-muted small mb-2">
+              <i class="bi bi-kanban me-1"></i>
+              Request Management
+            </div>
+            <h1 class="page-title mb-1">Request #{{ obj.pk }}</h1>
+            <div class="text-muted">Review request details, leave balance, approval workflow, and decisions.</div>
+            <div class="meta-wrap">
+              <span class="meta-pill">
+                <i class="bi bi-person"></i>
+                Created by <strong>{{ obj.created_by.username }}</strong>
+              </span>
+              <span class="meta-pill">
+                <i class="bi bi-calendar-event"></i>
+                Date: <strong>{{ obj.created_at|date:"d M Y, H:i" }}</strong>
+              </span>
+              <span class="meta-pill">
+                <i class="bi bi-shield-check"></i>
+                {% if obj.required_user %}
+                  Required: <strong>Targeted user first</strong>
+                {% else %}
+                  Required: <strong>{{ obj.get_required_role_display }}</strong>
+                {% endif %}
+              </span>
+            </div>
+          </div>
+          <div class="d-flex flex-column align-items-end gap-2">
+            {% if obj.status == "APPROVED" or obj.status == "APPROVE" %}
+              <span class="badge text-bg-success status-badge">
+                <i class="bi bi-check-circle me-1"></i>{{ obj.status }}
+              </span>
+            {% elif obj.status == "REJECTED" or obj.status == "REJECT" %}
+              <span class="badge text-bg-danger status-badge">
+                <i class="bi bi-x-circle me-1"></i>{{ obj.status }}
+              </span>
+            {% elif obj.status == "CANCELLED" or obj.status == "CANCELED" %}
+              <span class="badge text-bg-secondary status-badge">
+                <i class="bi bi-x-octagon me-1"></i>{{ obj.status }}
+              </span>
+            {% else %}
+              <span class="badge text-bg-dark status-badge">
+                <i class="bi bi-clock-history me-1"></i>{{ obj.status }}
+              </span>
+            {% endif %}
+            <a class="btn btn-outline-secondary btn-sm btn-pill"
+               href="{% url 'request_list' %}">
+              <i class="bi bi-arrow-left me-1"></i>
+              Back
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card glass-card mb-4">
+      <div class="card-soft-header">
+        <div class="d-flex align-items-center gap-3">
+          <div class="icon-box">
+            <i class="bi bi-file-text"></i>
+          </div>
+          <div>
+            <div class="section-title">{{ obj.title }}</div>
+            <div class="section-subtitle">Main request information and description.</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-soft-body">
+        {% if obj.body %}
+          <div class="description-box">{{ obj.body|linebreaks }}</div>
+        {% else %}
+          <div class="description-box text-muted">
+            <i class="bi bi-info-circle me-1"></i>
+            No description has been provided for this request.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    {% if stats %}
+      <div class="card glass-card mb-4">
+        <div class="card-soft-header">
+          <div class="d-flex align-items-center gap-3">
+            <div class="icon-box">
+              <i class="bi bi-calendar2-check"></i>
+            </div>
+            <div>
+              <div class="section-title">Leave Balance Summary</div>
+              <div class="section-subtitle">
+                Applicant: {{ obj.created_by.get_full_name|default:obj.created_by.username }} · Year: {{ stats.year }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-soft-body">
+          <div class="row g-3">
+            <div class="col-6 col-lg-3">
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="bi bi-wallet2"></i>
+                </div>
+                <div class="stat-label">Remaining Leave</div>
+                <div class="stat-value text-primary">{{ stats.remaining }}</div>
+                <div class="stat-unit">day(s)</div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="bi bi-check2-circle"></i>
+                </div>
+                <div class="stat-label">Approved Days</div>
+                <div class="stat-value text-success">{{ stats.approved_days }}</div>
+                <div class="stat-unit">day(s)</div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="bi bi-x-circle"></i>
+                </div>
+                <div class="stat-label">Rejected Days</div>
+                <div class="stat-value text-danger">{{ stats.rejected_days }}</div>
+                <div class="stat-unit">day(s)</div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="bi bi-x-octagon"></i>
+                </div>
+                <div class="stat-label">Cancelled Days</div>
+                <div class="stat-value text-secondary">{{ stats.cancelled_days }}</div>
+                <div class="stat-unit">day(s)</div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <span class="meta-pill">
+              <i class="bi bi-calendar-plus"></i>
+              Accrued: <strong>{{ stats.accrued }}</strong> day(s)
+            </span>
+            <span class="meta-pill">
+              <i class="bi bi-hourglass-split"></i>
+              Pending: <strong>{{ stats.pending_days|default:0 }}</strong> day(s)
+            </span>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    {% if request.user == obj.created_by and obj.status != "APPROVED" and obj.status != "REJECTED" and obj.status != "CANCELLED" %}
+      <div class="card cancel-card mb-4">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+              <div class="cancel-icon-box">
+                <i class="bi bi-x-octagon"></i>
+              </div>
+              <div>
+                <div class="section-title mb-1">Cancel this request</div>
+                <div class="text-muted small">You can cancel your request before it receives a final decision.</div>
+              </div>
+            </div>
+            <form method="post" action="{% url 'request_cancel' obj.pk %}">
+              {% csrf_token %}
+              <button type="submit"
+                      class="btn btn-outline-danger btn-pill"
+                      onclick="return confirm('Are you sure you want to cancel this request?');">
+                <i class="bi bi-x-circle me-1"></i>
+                Cancel Request
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    {% if obj.required_user %}
+      <div class="alert alert-info alert-modern mb-4">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-info-circle fs-5"></i>
+          <div>
+            Awaiting approval from replacement:
+            <strong>{{ obj.required_user.get_full_name|default:obj.required_user.username }}</strong>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    {% if can_act %}
+      <div class="card action-card mb-4">
+        <div class="card-soft-header">
+          <div class="d-flex align-items-center gap-3">
+            <div class="icon-box">
+              <i class="bi bi-lightning-charge"></i>
+            </div>
+            <div>
+              <div class="section-title">Take Action</div>
+              <div class="section-subtitle">Approve or reject this request with an optional comment.</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-soft-body">
+          <div class="row g-3">
+            <div class="col-lg-6">
+              <div class="action-panel h-100">
+                <form method="post" action="{% url 'request_approve' obj.pk %}">
+                  {% csrf_token %}
+                  <label class="form-label">Approval Comment</label>
+                  <textarea class="form-control rounded-4 mb-3"
+                            name="comment"
+                            rows="4"
+                            placeholder="Comment (optional)"></textarea>
+                  <button class="btn btn-success btn-pill">
+                    <i class="bi bi-check2-circle me-1"></i>
+                    Approve
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="action-panel h-100">
+                <form method="post" action="{% url 'request_reject' obj.pk %}">
+                  {% csrf_token %}
+                  <label class="form-label">Rejection Reason</label>
+                  <textarea class="form-control rounded-4 mb-3"
+                            name="comment"
+                            rows="4"
+                            placeholder="Reason (optional)"></textarea>
+                  <button class="btn btn-danger btn-pill">
+                    <i class="bi bi-x-circle me-1"></i>
+                    Reject
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    <div class="card history-card">
+      <div class="card-soft-header">
+        <div class="d-flex align-items-center gap-3">
+          <div class="icon-box">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <div>
+            <div class="section-title">Approval History</div>
+            <div class="section-subtitle">All decisions made for this request.</div>
+          </div>
+        </div>
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for ap in obj.approvals.all %}
+          <li class="list-group-item approval-item">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+              <div>
+                <span class="decision-pill">
+                  {% if ap.decision == "APPROVE" %}
+                    <i class="bi bi-check-circle text-success"></i>
+                  {% elif ap.decision == "REJECT" %}
+                    <i class="bi bi-x-circle text-danger"></i>
+                  {% else %}
+                    <i class="bi bi-dot"></i>
+                  {% endif %}
+                  {{ ap.get_decision_display }}
+                </span>
+                <span class="ms-2">
+                  by <strong>{{ ap.decided_by.username }}</strong>
+                </span>
+                {% if ap.decided_role %}<span class="text-muted small">({{ ap.get_decided_role_display }})</span>{% endif %}
+                {% if ap.comment %}<div class="comment-box text-muted small mt-3">{{ ap.comment }}</div>{% endif %}
+              </div>
+              <div class="text-muted small">
+                <i class="bi bi-calendar-check me-1"></i>
+                {{ ap.decided_at|date:"d M Y, H:i" }}
+              </div>
+            </div>
+          </li>
+        {% empty %}
+          <li class="list-group-item p-4">
+            <div class="empty-history">
+              <i class="bi bi-hourglass-split me-1"></i>
+              No decisions yet.
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

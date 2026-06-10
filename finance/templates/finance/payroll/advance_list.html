@@ -1,0 +1,361 @@
+{% extends "finance/finance_base.html" %}
+{% load persian_calendar %}
+{% block title %}Advance Requests{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+<style>
+    .advance-list-shell {
+        max-width: 1240px;
+        margin: 0 auto;
+    }
+
+    .advance-hero {
+        border: 0;
+        border-radius: 28px;
+        color: #fff;
+        background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 30%),
+            linear-gradient(135deg, #12324a 0%, #1f7a8c 52%, #4cb5ae 100%);
+        box-shadow: 0 24px 50px rgba(16, 24, 40, 0.16);
+        overflow: hidden;
+    }
+
+    .advance-hero .card-body {
+        padding: 1.5rem;
+    }
+
+    .advance-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .advance-title {
+        margin: 0.85rem 0 0.45rem;
+        font-size: clamp(1.5rem, 3vw, 2.35rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+    }
+
+    .advance-subtitle {
+        max-width: 68ch;
+        margin-bottom: 0;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .advance-stat {
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 20px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.06);
+        padding: 1rem 1.05rem;
+        min-height: 96px;
+    }
+
+    .advance-stat__label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: #64748b;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .advance-stat__value {
+        margin-top: 0.55rem;
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: #0f172a;
+        line-height: 1;
+    }
+
+    .advance-stat__hint {
+        color: #64748b;
+        font-size: 0.82rem;
+        margin-top: 0.35rem;
+    }
+
+    .advance-panel {
+        border: 0;
+        border-radius: 24px;
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+    }
+
+    .advance-panel .card-header {
+        border: 0;
+        background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    }
+
+    .requests-table thead th {
+        border-top: 0;
+        border-bottom-width: 1px;
+        color: #475569;
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        background: #f8fafc;
+        white-space: nowrap;
+    }
+
+    .requests-table tbody tr:hover {
+        background: rgba(28, 57, 187, 0.03);
+    }
+
+    .employee-name {
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .muted-cell {
+        color: #64748b;
+        font-size: 0.82rem;
+    }
+
+    .amount-cell {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #0f172a;
+        white-space: nowrap;
+    }
+
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        padding: 0.3rem 0.7rem;
+        font-size: 0.74rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .status-chip--pending {
+        background: #fff7e0;
+        color: #9a6200;
+    }
+
+    .status-chip--approved {
+        background: #e7f7ef;
+        color: #12734a;
+    }
+
+    .status-chip--rejected {
+        background: #fdecec;
+        color: #b42318;
+    }
+
+    .status-chip--paid {
+        background: #e8f4ff;
+        color: #0b5cab;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem 1rem;
+        color: #64748b;
+    }
+
+    .empty-state i {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .date-stack {
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+
+    .action-btn {
+        white-space: nowrap;
+    }
+
+    @media (max-width: 767.98px) {
+        .advance-hero .card-body {
+            padding: 1.2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block finance_content %}
+<div class="advance-list-shell">
+    <div class="card advance-hero mb-4">
+        <div class="card-body d-flex flex-wrap justify-content-between align-items-start gap-3">
+            <div>
+                <div class="advance-kicker mb-3">
+                    <i class="bi bi-cash-stack"></i>
+                    Salary advance queue
+                </div>
+                <h1 class="advance-title">Salary Advance Requests</h1>
+                <p class="advance-subtitle">
+                    Review pending requests, track repayment periods, and move requests through the approval workflow.
+                </p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'finance:advance_request' %}" class="btn btn-light fw-semibold">
+                    <i class="bi bi-plus-circle"></i> Request Advance
+                </a>
+                <a href="{% url 'finance:pending_approvals' %}" class="btn btn-outline-light fw-semibold">
+                    <i class="bi bi-clock-history"></i> Pending Approvals
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="advance-stat">
+                <div class="advance-stat__label"><i class="bi bi-inboxes"></i> Total</div>
+                <div class="advance-stat__value">{{ summary.advance_count }}</div>
+                <div class="advance-stat__hint">All advance requests</div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="advance-stat">
+                <div class="advance-stat__label"><i class="bi bi-hourglass-split"></i> Pending</div>
+                <div class="advance-stat__value">{{ summary.pending_count }}</div>
+                <div class="advance-stat__hint">Needs review</div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="advance-stat">
+                <div class="advance-stat__label"><i class="bi bi-check2-circle"></i> Approved</div>
+                <div class="advance-stat__value">{{ summary.approved_count }}</div>
+                <div class="advance-stat__hint">Ready for payout</div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="advance-stat">
+                <div class="advance-stat__label"><i class="bi bi-calendar-week"></i> Periods</div>
+                <div class="advance-stat__value">5</div>
+                <div class="advance-stat__hint">Configured options</div>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card advance-panel">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h3 class="mb-1"><i class="bi bi-table"></i> Requests</h3>
+                <div class="text-muted small">Sorted by newest first with approval status and repayment period.</div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="badge text-bg-primary rounded-pill px-3 py-2">
+                    <i class="bi bi-calendar2-week"></i> Persian dates enabled
+                </span>
+                {% if summary.can_review %}
+                <span class="badge text-bg-success rounded-pill px-3 py-2">
+                    <i class="bi bi-shield-check"></i> Approver view
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table requests-table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Amount</th>
+                            <th>Request Date</th>
+                            <th>Persian Date</th>
+                            <th>Installment Period</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for advance in advances %}
+                        <tr>
+                            <td>
+                                <div class="employee-name">{{ advance.employee.get_full_name|default:advance.employee.username }}</div>
+                                <div class="muted-cell">Request #{{ advance.id }}</div>
+                            </td>
+                            <td><span class="amount-cell">${{ advance.amount|floatformat:0 }}</span></td>
+                            <td>
+                                <div class="date-stack">{{ advance.requested_date|date:"Y-m-d" }}</div>
+                            </td>
+                            <td>
+                                <div class="date-stack">{{ advance.requested_date|date:"Y-m-d"|to_persian_date }}</div>
+                            </td>
+                            <td>
+                                <span class="badge text-bg-light border">{{ advance.installment_months }} months</span>
+                            </td>
+                            <td>
+                                {% if advance.status == 'pending' %}
+                                    <span class="status-chip status-chip--pending"><i class="bi bi-hourglass"></i> Pending</span>
+                                {% elif advance.status == 'approved' %}
+                                    <span class="status-chip status-chip--approved"><i class="bi bi-check2-circle"></i> Approved</span>
+                                {% elif advance.status == 'rejected' %}
+                                    <span class="status-chip status-chip--rejected"><i class="bi bi-x-circle"></i> Rejected</span>
+                                {% else %}
+                                    <span class="status-chip status-chip--paid"><i class="bi bi-wallet2"></i> Paid</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if summary.can_review and advance.status == 'pending' %}
+                                <a href="{% url 'finance:advance_approve' advance.id %}"
+                                   class="btn btn-sm btn-success action-btn"
+                                   onclick="return confirm('Approve this advance request?')">
+                                    <i class="bi bi-check-lg"></i> Review
+                                </a>
+                                {% elif summary.can_review and advance.status != 'rejected' and advance.status != 'approved' %}
+                                <a href="{% url 'finance:advance_approve' advance.id %}" class="btn btn-sm btn-outline-primary action-btn">
+                                    <i class="bi bi-eye"></i> Open
+                                </a>
+                                {% else %}
+                                <span class="text-muted small">No action</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <i class="bi bi-inbox"></i>
+                                    <h5 class="mb-2">No advance requests found</h5>
+                                    <p class="mb-3">Start by creating a request or wait for employees to submit one.</p>
+                                    {% if not user.is_superuser %}
+                                    <a href="{% url 'finance:advance_request' %}" class="btn btn-primary">
+                                        <i class="bi bi-plus-circle"></i> Request Advance
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% if user.is_superuser %}
+    <div class="mt-3 text-muted">
+        <small><i class="bi bi-calendar2-week"></i> Persian dates are automatically converted from Gregorian dates</small>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

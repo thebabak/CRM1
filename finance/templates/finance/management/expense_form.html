@@ -1,0 +1,65 @@
+{% extends "finance/finance_base.html" %}
+{% load persian_calendar %}
+{% block title %}Add Expense{% endblock %}
+{% block finance_content %}
+<div class="card">
+    <div class="card-header">
+        <h3><i class="bi bi-plus-circle"></i> Add Expense</h3>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> This feature is under development.
+        </div>
+        
+        <!-- Persian Calendar Info -->
+        <div class="alert alert-success">
+            <i class="bi bi-calendar2-week"></i>
+            Today's Persian Date: <strong>{% persian_today %}</strong>
+        </div>
+        
+        <form>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Title</label>
+                    <input type="text" class="form-control">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Category</label>
+                    <select class="form-select">
+                        <option>Office Supplies</option>
+                        <option>Utilities</option>
+                        <option>Travel</option>
+                        <option>Equipment</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Amount</label>
+                    <input type="number" class="form-control">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Date</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="date" class="form-control" value="{% now "Y-m-d" %}">
+                            <small>Gregorian</small>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" value="{% persian_today %}" disabled>
+                            <small>Persian Date</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Payment Method</label>
+                    <select class="form-select">
+                        <option>Cash</option>
+                        <option>Bank Transfer</option>
+                        <option>Check</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary" disabled>Save (Coming Soon)</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

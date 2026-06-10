@@ -1,0 +1,592 @@
+{% extends "base.html" %}
+{% block title %}Leave Request | ATO CRM{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1C39BB;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+    }
+    
+    .leave-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .leave-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+    
+    .leave-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #0f2f9f 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+    }
+    
+    .leave-header h2 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.75rem;
+    }
+    
+    .leave-header p {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+        font-size: 0.9rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 1rem;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    
+    .stat-value.used { color: var(--warning-color); }
+    .stat-value.remaining { color: var(--success-color); }
+    
+    .form-section {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-color);
+    }
+    
+    .date-group {
+        position: relative;
+    }
+    
+    .persian-hint {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: 12px;
+        padding: 0.5rem 1rem;
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+        font-family: 'Vazir', 'Tahoma', monospace;
+        direction: ltr;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid #fcd34d;
+    }
+    
+    .persian-hint i {
+        font-size: 1rem;
+        margin-left: 0.5rem;
+    }
+    
+    .persian-date-value {
+        font-weight: 700;
+        color: #92400e;
+        font-size: 1rem;
+    }
+    
+    .duration-preview {
+        margin-top: 0.75rem;
+        padding: 0.75rem;
+        background: #e8f5e9;
+        border-radius: 12px;
+        color: #2e7d32;
+        font-weight: 600;
+        display: none;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .duration-preview.show {
+        display: flex;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #374151;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 12px;
+        border: 1.5px solid #e5e7eb;
+        padding: 0.625rem 1rem;
+        transition: all 0.2s;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(28, 57, 187, 0.1);
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #0f2f9f 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 0.875rem 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+        width: 100%;
+        transition: transform 0.2s;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(28, 57, 187, 0.3);
+    }
+    
+    .btn-cancel {
+        border-radius: 12px;
+        padding: 0.875rem 2rem;
+        font-weight: 600;
+    }
+    
+    .replacement-help {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .mode-fields {
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-section {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="leave-container">
+    <div class="card leave-card">
+        <div class="leave-header">
+            <h2>
+                <i class="bi bi-calendar-plus"></i> 
+                New Leave Request
+            </h2>
+            <p>Submit your leave request for approval</p>
+        </div>
+        
+        <div class="card-body p-4">
+            <!-- Leave Balance Statistics -->
+            {% if stats %}
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">
+                        <i class="bi bi-calendar-check"></i> Total Accrued
+                    </div>
+                    <div class="stat-value">{{ stats.accrued|floatformat:1 }}</div>
+                    <small class="text-muted">days per year</small>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">
+                        <i class="bi bi-clock-history"></i> Used
+                    </div>
+                    <div class="stat-value used">{{ stats.used|floatformat:1 }}</div>
+                    <small class="text-muted">days taken</small>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">
+                        <i class="bi bi-calendar-heart"></i> Remaining
+                    </div>
+                    <div class="stat-value remaining">{{ stats.remaining|floatformat:1 }}</div>
+                    <small class="text-muted">days available</small>
+                </div>
+            </div>
+            {% endif %}
+            
+            <form method="post" id="leaveForm">
+                {% csrf_token %}
+                
+                <!-- Leave Type & Mode Selection -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="bi bi-info-circle"></i>
+                        Leave Information
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-tag"></i> Leave Type
+                            </label>
+                            {{ form.leave_type }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-clock"></i> Mode
+                            </label>
+                            {{ form.mode }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Daily Leave Fields -->
+                <div id="daily-fields" class="mode-fields">
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-calendar-week"></i>
+                            Daily Leave Details
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-calendar3"></i> From Date
+                                </label>
+                                <div class="date-group">
+                                    {{ form.daily_from }}
+                                </div>
+                                <div class="persian-hint" id="persian_from_display">
+                                    <i class="bi bi-moon-stars"></i>
+                                    <span>🕌 Persian Date: <span class="persian-date-value">—</span></span>
+                                </div>
+                            </div>
+                            <div class="col-md-5 mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-calendar3"></i> To Date
+                                </label>
+                                <div class="date-group">
+                                    {{ form.daily_to }}
+                                </div>
+                                <div class="persian-hint" id="persian_to_display">
+                                    <i class="bi bi-moon-stars"></i>
+                                    <span>🕌 Persian Date: <span class="persian-date-value">—</span></span>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-calculator"></i> Duration
+                                </label>
+                                {{ form.duration_days }}
+                                <div class="duration-preview" id="duration_preview">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span id="duration_text">0 days calculated</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hourly Leave Fields -->
+                <div id="hourly-fields" class="mode-fields" style="display: none;">
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-clock-history"></i>
+                            Hourly Leave Details
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-calendar-date"></i> Date
+                                </label>
+                                <div class="date-group">
+                                    {{ form.hourly_date }}
+                                </div>
+                                <div class="persian-hint" id="persian_hourly_display">
+                                    <i class="bi bi-moon-stars"></i>
+                                    <span>🕌 Persian Date: <span class="persian-date-value">—</span></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-sunrise"></i> From Time
+                                </label>
+                                {{ form.hourly_from }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-sunset"></i> To Time
+                                </label>
+                                {{ form.hourly_from }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Replacement Field -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="bi bi-people"></i>
+                        Replacement
+                    </div>
+                    <div class="mb-3">
+                        {{ form.replacement }}
+                        <div class="replacement-help">
+                            <i class="bi bi-info-circle-fill"></i>
+                            {{ form.replacement.help_text }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-flex gap-3 mt-4">
+                    <a href="{% url 'request_new_hub' %}" class="btn btn-outline-secondary btn-cancel flex-grow-1">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-submit flex-grow-1">
+                        <i class="bi bi-send-check"></i> Submit Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Persian digits mapping
+const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+
+function toPersianNumber(num) {
+    return num.toString().split('').map(d => persianDigits[d] || d).join('');
+}
+
+// Gregorian to Persian (Jalali) date conversion
+function gregorianToPersian(date) {
+    if (!date) return '';
+    
+    const d = new Date(date);
+    
+    // Accurate Persian calendar calculation
+    const gregorianYear = d.getFullYear();
+    const gregorianMonth = d.getMonth();
+    const gregorianDay = d.getDate();
+    
+    // Calculate Persian year
+    let persianYear = gregorianYear - 621;
+    let persianMonth = 1;
+    let persianDay = 1;
+    
+    // Simple approximation (for production, use jdatetime library)
+    const monthDays = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+    
+    // Calculate day of year
+    let dayOfYear = 0;
+    for (let i = 0; i < gregorianMonth; i++) {
+        dayOfYear += new Date(gregorianYear, i + 1, 0).getDate();
+    }
+    dayOfYear += gregorianDay;
+    
+    // Adjust for leap years
+    const isLeap = (gregorianYear % 4 === 0 && gregorianYear % 100 !== 0) || (gregorianYear % 400 === 0);
+    const adjust = isLeap && gregorianMonth > 1 ? 1 : 0;
+    dayOfYear += adjust;
+    
+    // Convert to Persian date
+    let remainingDays = dayOfYear - 79; // March 21 is Persian New Year
+    
+    if (remainingDays <= 0) {
+        persianYear--;
+        remainingDays += (isLeap ? 366 : 365);
+    }
+    
+    for (let i = 0; i < 12; i++) {
+        const daysInMonth = monthDays[i];
+        if (remainingDays <= daysInMonth) {
+            persianMonth = i + 1;
+            persianDay = remainingDays;
+            break;
+        }
+        remainingDays -= daysInMonth;
+    }
+    
+    return {
+        year: persianYear,
+        month: persianMonth,
+        day: persianDay
+    };
+}
+
+function formatPersianDate(date) {
+    if (!date) return '';
+    const persian = gregorianToPersian(date);
+    return `${toPersianNumber(persian.year)}/${toPersianNumber(persian.month)}/${toPersianNumber(persian.day)}`;
+}
+
+// Update Persian date display
+function updatePersianDate(inputId, displayId) {
+    const input = document.querySelector(inputId);
+    const displaySpan = document.querySelector(`${displayId} .persian-date-value`);
+    
+    if (input && input.value && displaySpan) {
+        const persianDate = formatPersianDate(input.value);
+        displaySpan.textContent = persianDate;
+    } else if (displaySpan) {
+        displaySpan.textContent = '—';
+    }
+}
+
+// Calculate duration between dates
+function calculateDuration() {
+    const fromDate = document.querySelector('#id_daily_from');
+    const toDate = document.querySelector('#id_daily_to');
+    const durationField = document.querySelector('#id_duration_days');
+    const durationPreview = document.getElementById('duration_preview');
+    const durationText = document.getElementById('duration_text');
+    
+    if (fromDate && toDate && fromDate.value && toDate.value) {
+        const start = new Date(fromDate.value);
+        const end = new Date(toDate.value);
+        
+        if (start && end && !isNaN(start) && !isNaN(end)) {
+            const diffTime = Math.abs(end - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            
+            if (durationField) {
+                durationField.value = diffDays;
+            }
+            
+            if (durationPreview && durationText) {
+                durationText.textContent = `${diffDays} day${diffDays !== 1 ? 's' : ''} calculated`;
+                durationPreview.classList.add('show');
+            }
+        }
+    } else if (durationPreview) {
+        durationPreview.classList.remove('show');
+    }
+}
+
+// Toggle between daily and hourly modes
+function toggleMode() {
+    const modeSelect = document.querySelector('#id_mode');
+    const dailyFields = document.getElementById('daily-fields');
+    const hourlyFields = document.getElementById('hourly-fields');
+    
+    if (modeSelect && modeSelect.value === 'DAILY') {
+        dailyFields.style.display = 'block';
+        hourlyFields.style.display = 'none';
+    } else if (modeSelect) {
+        dailyFields.style.display = 'none';
+        hourlyFields.style.display = 'block';
+    }
+}
+
+// Calculate hours for hourly leave (bonus feature)
+function calculateHours() {
+    const fromTime = document.querySelector('#id_hourly_from');
+    const toTime = document.querySelector('#id_hourly_to');
+    
+    if (fromTime && toTime && fromTime.value && toTime.value) {
+        const fromParts = fromTime.value.split(':');
+        const toParts = toTime.value.split(':');
+        
+        const fromHour = parseInt(fromParts[0]) + parseInt(fromParts[1]) / 60;
+        const toHour = parseInt(toParts[0]) + parseInt(toParts[1]) / 60;
+        
+        let hours = toHour - fromHour;
+        if (hours < 0) hours += 24;
+        
+        const days = (hours / 8).toFixed(1);
+        console.log(`Hours: ${hours}, Days: ${days}`);
+    }
+}
+
+// Initialize all date pickers and event listeners
+function initForm() {
+    // Daily date fields
+    const fromInput = '#id_daily_from';
+    const toInput = '#id_daily_to';
+    const hourlyDateInput = '#id_hourly_date';
+    
+    // Setup from date
+    const fromElement = document.querySelector(fromInput);
+    if (fromElement) {
+        fromElement.addEventListener('change', () => {
+            updatePersianDate(fromInput, '#persian_from_display');
+            calculateDuration();
+        });
+        updatePersianDate(fromInput, '#persian_from_display');
+    }
+    
+    // Setup to date
+    const toElement = document.querySelector(toInput);
+    if (toElement) {
+        toElement.addEventListener('change', () => {
+            updatePersianDate(toInput, '#persian_to_display');
+            calculateDuration();
+        });
+        updatePersianDate(toInput, '#persian_to_display');
+    }
+    
+    // Setup hourly date
+    const hourlyElement = document.querySelector(hourlyDateInput);
+    if (hourlyElement) {
+        hourlyElement.addEventListener('change', () => {
+            updatePersianDate(hourlyDateInput, '#persian_hourly_display');
+        });
+        updatePersianDate(hourlyDateInput, '#persian_hourly_display');
+    }
+    
+    // Setup hourly time fields
+    const hourlyFrom = document.querySelector('#id_hourly_from');
+    const hourlyTo = document.querySelector('#id_hourly_to');
+    if (hourlyFrom && hourlyTo) {
+        hourlyFrom.addEventListener('change', calculateHours);
+        hourlyTo.addEventListener('change', calculateHours);
+    }
+    
+    // Initial calculation
+    calculateDuration();
+}
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const modeSelect = document.querySelector('#id_mode');
+    if (modeSelect) {
+        modeSelect.addEventListener('change', toggleMode);
+        toggleMode();
+    }
+    
+    initForm();
+});
+</script>
+{% endblock %}

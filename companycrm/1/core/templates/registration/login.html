@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Sign in · Company CRM{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-7 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <div class="text-center mb-3">
+          <div class="display-6 mb-1"><i class="bi bi-box-arrow-in-right"></i></div>
+          <h1 class="h4 mb-0">Sign in</h1>
+          <div class="text-muted small">Welcome back</div>
+        </div>
+
+        {% if form.errors %}
+          <div class="alert alert-danger" role="alert">
+            Invalid username or password. Please try again.
+          </div>
+        {% endif %}
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-warning" role="alert">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}" class="needs-validation" novalidate>
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label for="id_username" class="form-label">Username</label>
+            <input type="text" name="username" autofocus required id="id_username"
+                   class="form-control" placeholder="your.username">
+            <div class="invalid-feedback">Please enter your username.</div>
+          </div>
+
+          <div class="mb-2">
+            <label for="id_password" class="form-label">Password</label>
+            <input type="password" name="password" required id="id_password"
+                   class="form-control" placeholder="••••••••">
+            <div class="invalid-feedback">Please enter your password.</div>
+          </div>
+
+          <input type="hidden" name="next" value="{{ next }}">
+
+          <div class="d-grid gap-2 mt-3">
+            <button class="btn btn-primary" type="submit">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Log in
+            </button>
+          </div>
+        </form>
+
+        <div class="d-flex justify-content-between mt-3">
+          <a class="small" href="{% url 'password_reset' %}">Forgot password?</a>
+          <a class="small text-muted" href="{% url 'home' %}">← Back to home</a>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-center text-muted small mt-3">
+      Need access? Ask an admin to create your account.
+    </p>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Client-side validation style
+  (() => {
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault(); event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
+</script>
+{% endblock %}

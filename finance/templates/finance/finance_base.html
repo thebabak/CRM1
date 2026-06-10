@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+{% load persian_calendar %}
+{% block title %}Finance - ATO CRM{% endblock %}
+
+{% block extra_head %}
+<style>
+    .finance-sidebar {
+        position: sticky;
+        top: 22px;
+        flex: 0 0 220px;
+        width: 220px;
+        max-width: 220px;
+    }
+
+    .finance-nav-card {
+        border: 0;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 42px rgba(15, 23, 42, 0.12);
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        min-height: calc(100vh - 70px);
+    }
+
+    .finance-nav-header {
+        position: relative;
+        padding: 0.9rem 0.8rem 0.8rem;
+        color: #fff;
+        background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.24), transparent 30%),
+            linear-gradient(135deg, #12324a 0%, #1f7a8c 52%, #4cb5ae 100%);
+    }
+
+    .finance-nav-header::after {
+        content: '';
+        position: absolute;
+        inset: auto -40px -55px auto;
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .finance-nav-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.16);
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+
+    .finance-nav-title {
+        margin: 0.55rem 0 0.25rem;
+        font-size: 0.98rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        position: relative;
+        z-index: 1;
+    }
+
+    .finance-nav-subtitle {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 0.74rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .finance-nav-body {
+        padding: 0.55rem;
+        overflow: auto;
+    }
+
+    .finance-section-label {
+        margin: 0.65rem 0 0.35rem;
+        padding: 0.05rem 0.25rem;
+        color: #64748b;
+        font-size: 0.63rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .finance-link {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.56rem 0.58rem;
+        margin-bottom: 0.28rem;
+        border-radius: 12px;
+        color: #0f172a !important;
+        text-decoration: none !important;
+        border: 1px solid transparent;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+
+    .finance-link, .finance-link:hover, .finance-link:focus {
+        color: #0f172a !important;
+        text-decoration: none !important;
+    }
+
+    .finance-link:hover {
+        transform: translateY(-1px);
+        background: #fff;
+        border-color: rgba(100, 116, 139, 0.16);
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+        color: #0f172a;
+    }
+
+    .finance-link.active {
+        background: linear-gradient(135deg, rgba(31, 122, 140, 0.14), rgba(76, 181, 174, 0.18));
+        border-color: rgba(31, 122, 140, 0.18);
+        box-shadow: 0 12px 24px rgba(31, 122, 140, 0.12);
+        color: #0f172a;
+    }
+
+    .finance-link.active .finance-link-icon {
+        background: linear-gradient(135deg, #1f7a8c 0%, #4cb5ae 100%);
+        color: #fff;
+    }
+
+    .finance-link-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef6fb;
+        color: #1f7a8c;
+        flex: 0 0 auto;
+        font-size: 0.84rem;
+    }
+
+    .finance-link-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+        min-width: 0;
+    }
+
+    .finance-link-title {
+        font-weight: 700;
+        white-space: nowrap;
+        font-size: 0.8rem;
+    }
+
+    .finance-link-subtitle {
+        color: #64748b;
+        font-size: 0.64rem;
+        margin-top: 0.2rem;
+        white-space: normal;
+    }
+
+    .finance-quick-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.45rem;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 0.66rem;
+        font-weight: 700;
+    }
+
+    .finance-date-card {
+        margin-top: 1rem;
+        padding: 0.7rem 0.75rem;
+        border-radius: 14px;
+        background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .finance-date-card .small {
+        color: #64748b;
+    }
+
+    @media (max-width: 991.98px) {
+        .finance-sidebar {
+            position: static;
+            top: auto;
+            margin-bottom: 1rem;
+            flex: 1 1 auto;
+            width: 100%;
+            max-width: none;
+        }
+
+        .finance-nav-card {
+            min-height: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="d-flex flex-column flex-lg-row gap-4 align-items-start finance-layout">
+        <div class="finance-sidebar">
+            <div class="card finance-nav-card">
+                <div class="finance-nav-header">
+                    <div class="finance-nav-kicker">
+                        <i class="bi bi-sparkles"></i>
+                        Finance Hub
+                    </div>
+                    <h5 class="finance-nav-title">Navigation</h5>
+                    <p class="finance-nav-subtitle">Payroll, management, and loan tools in one place.</p>
+                </div>
+
+                <div class="finance-nav-body">
+                    <div class="finance-quick-pill mb-2">
+                        <i class="bi bi-clock-history"></i>
+                        Pending approvals
+                    </div>
+
+                    <a href="{% url 'finance:pending_approvals' %}" class="finance-link {% if request.path == '/finance/approvals/' %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-clock-history"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Pending Approvals</span>
+                            <span class="finance-link-subtitle">Review waiting requests</span>
+                        </span>
+                    </a>
+
+                    <div class="finance-section-label">Payroll</div>
+                    <a href="{% url 'finance:payroll_dashboard' %}" class="finance-link {% if '/finance/payroll/' in request.path and request.path == '/finance/payroll/' %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-speedometer2"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Dashboard</span>
+                            <span class="finance-link-subtitle">Overview and KPIs</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'finance:salary_list' %}" class="finance-link {% if '/finance/payroll/salaries/' in request.path %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-list-ul"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Salaries</span>
+                            <span class="finance-link-subtitle">Salary records</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'finance:salary_create' %}" class="finance-link {% if request.path == '/finance/payroll/salaries/create/' %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-plus-circle"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Create Salary</span>
+                            <span class="finance-link-subtitle">Add new payroll entry</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'finance:advance_list' %}" class="finance-link {% if '/finance/payroll/advances/' in request.path and request.path != '/finance/payroll/advances/request/' %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-cash-coin"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Advance Requests</span>
+                            <span class="finance-link-subtitle">Track employee advances</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'finance:advance_request' %}" class="finance-link {% if request.path == '/finance/payroll/advances/request/' %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-send-plus"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Request Advance</span>
+                            <span class="finance-link-subtitle">Submit a new request</span>
+                        </span>
+                    </a>
+
+                    <div class="finance-section-label">Financial Management</div>
+                    <a href="{% url 'finance:finance_dashboard' %}" class="finance-link {% if '/finance/management/' in request.path and request.path == '/finance/management/' %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-grid-1x2"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Dashboard</span>
+                            <span class="finance-link-subtitle">Management overview</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'finance:expense_list' %}" class="finance-link {% if '/finance/management/expenses/' in request.path %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-receipt"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Expenses</span>
+                            <span class="finance-link-subtitle">Expense tracking</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'finance:expense_create' %}" class="finance-link {% if request.path == '/finance/management/expenses/create/' %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-plus-square"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Add Expense</span>
+                            <span class="finance-link-subtitle">Record a new expense</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'finance:income_list' %}" class="finance-link {% if '/finance/management/incomes/' in request.path %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-wallet2"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Incomes</span>
+                            <span class="finance-link-subtitle">Income records</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'finance:income_create' %}" class="finance-link {% if request.path == '/finance/management/incomes/create/' %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-plus-lg"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Add Income</span>
+                            <span class="finance-link-subtitle">Record incoming cash</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'finance:budget_list' %}" class="finance-link {% if '/finance/management/budgets/' in request.path %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-pie-chart"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Budgets</span>
+                            <span class="finance-link-subtitle">Plan versus actual</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'finance:bank_accounts' %}" class="finance-link {% if '/finance/management/bank-accounts/' in request.path %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-bank2"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Bank Accounts</span>
+                            <span class="finance-link-subtitle">Balances and accounts</span>
+                        </span>
+                    </a>
+
+                    <div class="finance-section-label">Loans</div>
+                    <a href="{% url 'finance:loan_request' %}" class="finance-link {% if request.path == '/finance/loans/request/' %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-currency-dollar"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">Request a Loan</span>
+                            <span class="finance-link-subtitle">Start a new request</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'finance:all_requests' %}" class="finance-link {% if '/finance/all-requests/' in request.path %}active{% endif %}">
+                        <span class="finance-link-icon"><i class="bi bi-list-ul"></i></span>
+                        <span class="finance-link-text">
+                            <span class="finance-link-title">All Requests</span>
+                            <span class="finance-link-subtitle">Browse every request</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="flex-grow-1 min-vw-0 finance-content">
+            <div class="mb-3 text-end">
+                <span class="badge rounded-pill text-bg-primary px-3 py-2 shadow-sm">
+                    <i class="bi bi-calendar2-week"></i>
+                    Persian Date: {% persian_today %}
+                </span>
+            </div>
+            {% block finance_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "finance/finance_base.html" %}
+{% block title %}Add Income{% endblock %}
+{% block finance_content %}
+<div class="card">
+    <div class="card-header">
+        <h3><i class="bi bi-plus-circle"></i> Add Income</h3>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> This feature is under development.
+        </div>
+        <form>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Title</label>
+                    <input type="text" class="form-control">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Income Type</label>
+                    <select class="form-select">
+                        <option>Service Income</option>
+                        <option>Product Sales</option>
+                        <option>Investment</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Amount</label>
+                    <input type="number" class="form-control">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Client</label>
+                    <input type="text" class="form-control">
+                </div>
+            </div>
+            <button class="btn btn-primary" disabled>Save (Coming Soon)</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Internal Letters{% endblock %}
+
+{% block content %}
+<style>
+  .letter-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+  
+  .letter-header {
+    background: linear-gradient(135deg, #1C39BB 0%, #155f83 100%);
+    color: white;
+    padding: 2rem;
+  }
+  
+  .filter-bar {
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1rem 1.5rem;
+  }
+  
+  .filter-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  
+  .filter-btn.active {
+    background: #1C39BB;
+    color: white;
+  }
+  
+  .filter-btn:not(.active) {
+    color: #6b7280;
+  }
+  
+  .filter-btn:not(.active):hover {
+    background: #f3f4f6;
+  }
+  
+  .letter-item {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+  
+  .letter-item:hover {
+    background: #f8fafc;
+  }
+  
+  .letter-item.unread {
+    background: #eef2ff;
+  }
+  
+  .letter-subject {
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.25rem;
+  }
+  
+  .letter-meta {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+  
+  .compose-btn {
+    background: white;
+    color: #1C39BB;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  
+  .compose-btn:hover {
+    background: rgba(255,255,255,0.9);
+    transform: translateY(-2px);
+  }
+</style>
+
+<div class="container">
+  <div class="letter-card">
+    <div class="letter-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 style="color: white; margin-bottom: 0.5rem;">
+            <i class="bi bi-envelope-paper me-2"></i>
+            Internal Letters
+          </h1>
+          <p style="color: rgba(255,255,255,0.9); margin-bottom: 0;">
+            Communicate with your colleagues
+          </p>
+        </div>
+        <div>
+          <a href="/letters/create/" class="compose-btn text-decoration-none">
+            <i class="bi bi-pencil-square me-2"></i>
+            Compose
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="filter-bar">
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="?filter=all" class="filter-btn {% if current_filter == 'all' %}active{% endif %}">
+          <i class="bi bi-inbox me-1"></i> All
+        </a>
+        <a href="?filter=inbox" class="filter-btn {% if current_filter == 'inbox' %}active{% endif %}">
+          <i class="bi bi-envelope me-1"></i> Inbox
+          {% if unread_count > 0 %}
+            <span class="badge bg-danger ms-1">{{ unread_count }}</span>
+          {% endif %}
+        </a>
+        <a href="?filter=sent" class="filter-btn {% if current_filter == 'sent' %}active{% endif %}">
+          <i class="bi bi-send me-1"></i> Sent
+        </a>
+        <a href="?filter=cc" class="filter-btn {% if current_filter == 'cc' %}active{% endif %}">
+          <i class="bi bi-people me-1"></i> CC'd
+        </a>
+        <a href="?filter=unread" class="filter-btn {% if current_filter == 'unread' %}active{% endif %}">
+          <i class="bi bi-eye-slash me-1"></i> Unread
+        </a>
+      </div>
+    </div>
+    
+    <div>
+      {% for letter in letters %}
+        <div class="letter-item {% if not letter.is_read_by and letter.recipient == user %}unread{% endif %}"
+             onclick="window.location.href='/letters/{{ letter.pk }}/'">
+          <div class="row align-items-center">
+            <div class="col-md-6">
+              <div class="letter-subject">
+                {% if not letter.is_read_by and letter.recipient == user %}
+                  <i class="bi bi-envelope-fill me-2" style="color: #1C39BB;"></i>
+                {% else %}
+                  <i class="bi bi-envelope-open me-2" style="color: #9ca3af;"></i>
+                {% endif %}
+                {{ letter.subject }}
+              </div>
+              <div class="letter-meta">
+                <i class="bi bi-person me-1"></i>
+                {% if letter.sender == user %}
+                  To: {{ letter.recipient.get_full_name|default:letter.recipient.username }}
+                {% else %}
+                  From: {{ letter.sender.get_full_name|default:letter.sender.username }}
+                {% endif %}
+                {% if letter.cc.all %}
+                  <span class="ms-2">
+                    <i class="bi bi-people"></i> CC: {{ letter.cc.count }}
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="letter-meta">
+                <i class="bi bi-calendar me-1"></i>
+                {{ letter.created_at|date:"M d, Y" }}
+              </div>
+            </div>
+            <div class="col-md-3 text-md-end">
+              <span class="badge {% if letter.status == 'SENT' %}bg-success{% else %}bg-secondary{% endif %}">
+                {{ letter.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="text-center py-5">
+          <i class="bi bi-envelope-paper" style="font-size: 3rem; color: #d1d5db;"></i>
+          <p class="text-muted mt-3">No letters found</p>
+          <a href="/letters/create/" class="btn btn-primary mt-2" style="background: #1C39BB;">
+            Compose your first letter
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+    
+    {% if letters.has_other_pages %}
+      <div class="pagination justify-content-center py-3">
+        {% if letters.has_previous %}
+          <a href="?page={{ letters.previous_page_number }}{% if current_filter %}&filter={{ current_filter }}{% endif %}" class="btn btn-outline-secondary mx-1">Previous</a>
+        {% endif %}
+        
+        <span class="current-page mx-3 mt-2">
+          Page {{ letters.number }} of {{ letters.paginator.num_pages }}
+        </span>
+        
+        {% if letters.has_next %}
+          <a href="?page={{ letters.next_page_number }}{% if current_filter %}&filter={{ current_filter }}{% endif %}" class="btn btn-outline-secondary mx-1">Next</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

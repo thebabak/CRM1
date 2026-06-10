@@ -1,0 +1,62 @@
+{% extends "finance/finance_base.html" %}
+{% load persian_calendar %}
+{% block title %}Employees - Payroll{% endblock %}
+
+{% block finance_content %}
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h3 class="mb-0"><i class="bi bi-people"></i> Employee List</h3>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle"></i> Total Employees: {{ employees|length }}
+            <br>
+            <small>All registered users are automatically employees</small>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Employee Code</th>
+                        <th>Name</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Position</th>
+                        <th>Hire Date (Persian)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                    <tr>
+                        <td>{{ employee.employee_code }}</td>
+                        <td>{{ employee.user.get_full_name|default:"-" }}</td>
+                        <td>{{ employee.user.username }}</td>
+                        <td>{{ employee.user.email|default:"-" }}</td>
+                        <td>{{ employee.department|default:"-" }}</td>
+                        <td>{{ employee.position|default:"-" }}</td>
+                        <td>
+                            {{ employee.hire_date|date:"Y-m-d" }}
+                            <small class="text-muted d-block">{{ employee.hire_date|date:"Y-m-d"|to_persian_date }}</small>
+                        </td>
+                        <td>
+                            {% if employee.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">No employees found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

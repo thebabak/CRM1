@@ -1,0 +1,87 @@
+{% extends "finance/finance_base.html" %}
+{% load persian_calendar %}
+{% block title %}Request a Loan{% endblock %}
+
+{% block finance_content %}
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h3 class="mb-0"><i class="bi bi-bank"></i> Request a Loan</h3>
+    </div>
+    <div class="card-body">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            Please fill out the form below to request a loan. Your request will be reviewed by Finance Management.
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Loan Type</label>
+                    {{ form.loan_type }}
+                    {% if form.loan_type.errors %}
+                        <div class="text-danger">{{ form.loan_type.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Amount Requested (تومان)</label>
+                    {{ form.amount_requested }}
+                    {% if form.amount_requested.errors %}
+                        <div class="text-danger">{{ form.amount_requested.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">Enter the amount in Toman ( Iranian currency )</div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Repayment Period</label>
+                    {{ form.tenure_months }}
+                    {% if form.tenure_months.errors %}
+                        <div class="text-danger">{{ form.tenure_months.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Request Date</label>
+                    <div class="alert alert-secondary">
+                        <strong>Gregorian:</strong> {% now "Y-m-d" %}<br>
+                        <strong>Persian:</strong> {% persian_today %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Reason for Loan</label>
+                {{ form.reason }}
+                {% if form.reason.errors %}
+                    <div class="text-danger">{{ form.reason.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                <strong>Important Note:</strong> Loan approval is subject to Finance Management review.
+            </div>
+            
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-send-check"></i> Submit Request
+                </button>
+                <a href="{% url 'finance:loan_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

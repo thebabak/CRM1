@@ -1,0 +1,39 @@
+{% extends "finance/finance_base.html" %}
+{% block finance_content %}
+<div class="card">
+    <div class="card-header">
+        <h3>Financial Management Dashboard</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h5>Total Expenses</h5>
+                        <h3>${{ total_expenses|floatformat:0 }}</h3>
+                        <small>Year {{ current_year }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5>Total Income</h5>
+                        <h3>${{ total_income|floatformat:0 }}</h3>
+                        <small>Year {{ current_year }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5>Net Profit</h5>
+                        <h3>${{ profit|floatformat:0 }}</h3>
+                        <small>Year {{ current_year }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "finance/finance_base.html" %}
+{% load persian_calendar %}
+{% block title %}Review Loan Request{% endblock %}
+
+{% block finance_content %}
+<div class="card">
+    <div class="card-header bg-success text-white">
+        <h3 class="mb-0"><i class="bi bi-check-circle"></i> Review Loan Request</h3>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <strong>Employee:</strong> {{ loan.employee.user.get_full_name|default:loan.employee.user.username }}<br>
+            <strong>Request Date:</strong> {{ loan.request_date|date:"Y-m-d" }} (Persian: {{ loan.request_date|date:"Y-m-d"|to_persian_date }})<br>
+            <strong>Loan Type:</strong> {{ loan.get_loan_type_display }}<br>
+            <strong>Amount Requested:</strong> ${{ loan.amount_requested|floatformat:0 }}<br>
+            <strong>Reason:</strong> {{ loan.reason }}
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Approved Amount ($)</label>
+                    {{ form.amount_approved }}
+                    <div class="form-text">Leave empty to reject or enter approved amount</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Interest Rate (%)</label>
+                    {{ form.interest_rate }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Repayment Period</label>
+                    {{ form.tenure_months }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Status</label>
+                    {{ form.status }}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Comments / Conditions</label>
+                {{ form.comments }}
+            </div>
+            
+            <div class="mt-3">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-lg"></i> Submit Decision
+                </button>
+                <a href="{% url 'finance:loan_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
