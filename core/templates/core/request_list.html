@@ -1,9 +1,8 @@
 {% extends "base.html" %}
 {% load persian_calendar %}
 {% block title %}Requests - Company CRM{% endblock %}
-
 {% block content %}
-<style>
+  <style>
   .requests-page {
     max-width: 1280px;
     margin: 0 auto;
@@ -25,6 +24,40 @@
     border-radius: 18px;
     padding: 12px;
     box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+  }
+
+  .th-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .th-filter-btn {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .th-filter-menu {
+    min-width: 240px;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+  }
+
+  .th-filter-menu .form-select {
+    margin-bottom: 8px;
+  }
+
+  .th-filter-actions {
+    display: flex;
+    gap: 8px;
   }
 
   .requests-card {
@@ -144,140 +177,290 @@
     text-align: center;
     color: #6b7280;
   }
-</style>
-
-<div class="requests-page">
-  <div class="card requests-hero mb-4">
-    <div class="card-body p-4">
-      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-          <div class="text-muted small mb-2">
-            <i class="bi bi-kanban me-1"></i>
-            Request Management
+  </style>
+  <div class="requests-page">
+    <div class="card requests-hero mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div>
+            <div class="text-muted small mb-2">
+              <i class="bi bi-kanban me-1"></i>
+              Request Management
+            </div>
+            <h1 class="page-title mb-1">Requests</h1>
+            <div class="text-muted">View, track, and manage your related company requests</div>
+            <div class="mt-2">
+              <span class="persian-badge">
+                <i class="bi bi-calendar2-week"></i>
+                Persian Today: {% persian_today %}
+              </span>
+            </div>
           </div>
-          <h1 class="page-title mb-1">Requests</h1>
-          <div class="text-muted">
-            View, track, and manage your related company requests
-          </div>
-          <div class="mt-2">
-            <span class="persian-badge">
-              <i class="bi bi-calendar2-week"></i>
-              Persian Today: {% persian_today %}
-            </span>
+          <div class="d-flex flex-wrap gap-2">
+            {% if can_export_excel %}
+              <a class="btn excel-btn rounded-pill px-4"
+                 href="{% url 'request_export_excel' %}?{{ request.GET.urlencode }}">
+                <i class="bi bi-file-earmark-excel me-1"></i>
+                Export Excel
+              </a>
+            {% endif %}
+            <a class="btn btn-primary rounded-pill px-4"
+               href="{% url 'request_new_hub' %}">
+              <i class="bi bi-plus-square me-1"></i>
+              New Request
+            </a>
           </div>
         </div>
+      </div>
+    </div>
+    <div class="filter-bar mb-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div class="d-flex flex-wrap gap-2">
-          {% if can_export_excel %}
-            <a class="btn excel-btn rounded-pill px-4"
-               href="{% url 'request_export_excel' %}?{{ request.GET.urlencode }}">
-              <i class="bi bi-file-earmark-excel me-1"></i>
-              Export Excel
-            </a>
-          {% endif %}
-          <a class="btn btn-primary rounded-pill px-4" href="{% url 'request_new_hub' %}">
-            <i class="bi bi-plus-square me-1"></i>
-            New Request
+          <a class="btn btn-outline-secondary btn-sm rounded-pill"
+             href="{% url 'request_list' %}">
+            <i class="bi bi-list-ul me-1"></i>
+            All Requests
+          </a>
+          <a class="btn btn-outline-secondary btn-sm rounded-pill" href="?mine=1">
+            <i class="bi bi-person me-1"></i>
+            My Requests
+          </a>
+          <a class="btn btn-outline-secondary btn-sm rounded-pill"
+             href="?pending=1">
+            <i class="bi bi-hourglass-split me-1"></i>
+            Pending
           </a>
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="filter-bar mb-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-      <div class="d-flex flex-wrap gap-2">
-        <a class="btn btn-outline-secondary btn-sm rounded-pill" href="{% url 'request_list' %}">
-          <i class="bi bi-list-ul me-1"></i>
-          All Requests
-        </a>
-        <a class="btn btn-outline-secondary btn-sm rounded-pill" href="?mine=1">
-          <i class="bi bi-person me-1"></i>
-          My Requests
-        </a>
-        <a class="btn btn-outline-secondary btn-sm rounded-pill" href="?pending=1">
-          <i class="bi bi-hourglass-split me-1"></i>
-          Pending
-        </a>
+    <div class="card requests-card">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 requests-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>
+                  <div class="th-filter">
+                    <span>Title</span>
+                    <div class="dropdown">
+                      <button class="btn btn-sm th-filter-btn {% if selected_title %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+                              type="button"
+                              data-bs-toggle="dropdown"
+                              data-bs-auto-close="outside"
+                              aria-expanded="false"
+                              title="Filter title">
+                        <i class="bi bi-funnel"></i>
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-end th-filter-menu">
+                        <form method="get">
+                          {% if selected_mine %}<input type="hidden" name="mine" value="{{ selected_mine }}">{% endif %}
+                          {% if selected_pending %}<input type="hidden" name="pending" value="{{ selected_pending }}">{% endif %}
+                          <input type="hidden" name="status" value="{{ selected_status }}">
+                          <input type="hidden" name="role" value="{{ selected_role }}">
+                          <input type="hidden" name="creator" value="{{ selected_creator }}">
+                          <input type="hidden" name="date" value="{{ selected_date }}">
+                          <select name="title" class="form-select form-select-sm">
+                            <option value="">All titles</option>
+                            {% for t in title_options %}
+                              <option value="{{ t }}" {% if selected_title == t %}selected{% endif %}>{{ t }}</option>
+                            {% endfor %}
+                          </select>
+                          <div class="th-filter-actions">
+                            <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+                            <a href="{% url 'request_list' %}"
+                               class="btn btn-outline-secondary btn-sm">Clear</a>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </th>
+                <th>
+                  <div class="th-filter">
+                    <span>Status</span>
+                    <div class="dropdown">
+                      <button class="btn btn-sm th-filter-btn {% if selected_status %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+                              type="button"
+                              data-bs-toggle="dropdown"
+                              data-bs-auto-close="outside"
+                              aria-expanded="false"
+                              title="Filter status">
+                        <i class="bi bi-funnel"></i>
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-end th-filter-menu">
+                        <form method="get">
+                          {% if selected_mine %}<input type="hidden" name="mine" value="{{ selected_mine }}">{% endif %}
+                          {% if selected_pending %}<input type="hidden" name="pending" value="{{ selected_pending }}">{% endif %}
+                          <input type="hidden" name="title" value="{{ selected_title }}">
+                          <input type="hidden" name="role" value="{{ selected_role }}">
+                          <input type="hidden" name="creator" value="{{ selected_creator }}">
+                          <input type="hidden" name="date" value="{{ selected_date }}">
+                          <select name="status" class="form-select form-select-sm">
+                            <option value="">All statuses</option>
+                            <option value="DRAFT" {% if selected_status == "DRAFT" %}selected{% endif %}>Draft</option>
+                            <option value="SUBMITTED"
+                                    {% if selected_status == "SUBMITTED" %}selected{% endif %}>Submitted</option>
+                            <option value="IN_REVIEW"
+                                    {% if selected_status == "IN_REVIEW" %}selected{% endif %}>In Review</option>
+                            <option value="APPROVED"
+                                    {% if selected_status == "APPROVED" %}selected{% endif %}>Approved</option>
+                            <option value="REJECTED"
+                                    {% if selected_status == "REJECTED" %}selected{% endif %}>Rejected</option>
+                            <option value="CANCELLED"
+                                    {% if selected_status == "CANCELLED" %}selected{% endif %}>Cancelled</option>
+                          </select>
+                          <div class="th-filter-actions">
+                            <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+                            <a href="{% url 'request_list' %}"
+                               class="btn btn-outline-secondary btn-sm">Clear</a>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </th>
+                <th>
+                  <div class="th-filter">
+                    <span>Required Role</span>
+                    <div class="dropdown">
+                      <button class="btn btn-sm th-filter-btn {% if selected_role %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+                              type="button"
+                              data-bs-toggle="dropdown"
+                              data-bs-auto-close="outside"
+                              aria-expanded="false"
+                              title="Filter role">
+                        <i class="bi bi-funnel"></i>
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-end th-filter-menu">
+                        <form method="get">
+                          {% if selected_mine %}<input type="hidden" name="mine" value="{{ selected_mine }}">{% endif %}
+                          {% if selected_pending %}<input type="hidden" name="pending" value="{{ selected_pending }}">{% endif %}
+                          <input type="hidden" name="title" value="{{ selected_title }}">
+                          <input type="hidden" name="status" value="{{ selected_status }}">
+                          <input type="hidden" name="creator" value="{{ selected_creator }}">
+                          <input type="hidden" name="date" value="{{ selected_date }}">
+                          <select name="role" class="form-select form-select-sm">
+                            <option value="">All roles</option>
+                            {% for role in role_options %}
+                              <option value="{{ role.value }}"
+                                      {% if selected_role == role.value %}selected{% endif %}>{{ role.label }}</option>
+                            {% endfor %}
+                          </select>
+                          <div class="th-filter-actions">
+                            <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+                            <a href="{% url 'request_list' %}"
+                               class="btn btn-outline-secondary btn-sm">Clear</a>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </th>
+                <th>
+                  <div class="th-filter">
+                    <span>Creator</span>
+                    <div class="dropdown">
+                      <button class="btn btn-sm th-filter-btn {% if selected_creator %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+                              type="button"
+                              data-bs-toggle="dropdown"
+                              data-bs-auto-close="outside"
+                              aria-expanded="false"
+                              title="Filter creator">
+                        <i class="bi bi-funnel"></i>
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-end th-filter-menu">
+                        <form method="get">
+                          {% if selected_mine %}<input type="hidden" name="mine" value="{{ selected_mine }}">{% endif %}
+                          {% if selected_pending %}<input type="hidden" name="pending" value="{{ selected_pending }}">{% endif %}
+                          <input type="hidden" name="title" value="{{ selected_title }}">
+                          <input type="hidden" name="status" value="{{ selected_status }}">
+                          <input type="hidden" name="role" value="{{ selected_role }}">
+                          <input type="hidden" name="date" value="{{ selected_date }}">
+                          <select name="creator" class="form-select form-select-sm">
+                            <option value="">All creators</option>
+                            {% for c in creator_options %}
+                              <option value="{{ c.created_by__id }}"
+                                      {% if selected_creator == c.created_by__id|stringformat:"s" %}selected{% endif %}>
+                                {{ c.created_by__username }}
+                              </option>
+                            {% endfor %}
+                          </select>
+                          <div class="th-filter-actions">
+                            <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+                            <a href="{% url 'request_list' %}"
+                               class="btn btn-outline-secondary btn-sm">Clear</a>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </th>
+                <th class="date-cell">Date (Gregorian / Persian)</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in requests %}
+                <tr>
+                  <td>
+                    <span class="request-id">#{{ r.pk }}</span>
+                  </td>
+                  <td>
+                    <a class="request-title-link" href="{% url 'request_detail' r.pk %}">{{ r.title }}</a>
+                  </td>
+                  <td>
+                    {% if r.status == "APPROVED" %}
+                      <span class="badge bg-success status-badge">✓ {{ r.status }}</span>
+                    {% elif r.status == "REJECTED" %}
+                      <span class="badge bg-danger status-badge">✗ {{ r.status }}</span>
+                    {% elif r.status == "CANCELLED" %}
+                      <span class="badge bg-secondary status-badge">⊗ {{ r.status }}</span>
+                    {% else %}
+                      <span class="badge bg-dark status-badge">⟳ {{ r.status }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="text-muted small">{{ r.get_required_role_display }}</span>
+                  </td>
+                  <td>
+                    <span class="creator-pill">
+                      <i class="bi bi-person-circle"></i>
+                      {{ r.created_by.username }}
+                    </span>
+                  </td>
+                  <td class="date-cell">
+                    <div class="dual-date">
+                      <div class="gregorian-date">
+                        <i class="bi bi-calendar3"></i> {{ r.created_at|date:"Y-m-d H:i" }}
+                      </div>
+                      <div class="persian-date">
+                        <i class="bi bi-calendar2-week"></i> {{ r.created_at|date:"Y-m-d"|to_persian_date }} {{ r.created_at|date:"H:i" }}
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <a class="btn btn-sm btn-outline-primary action-btn"
+                       href="{% url 'request_detail' r.pk %}"
+                       title="View request">
+                      <i class="bi bi-box-arrow-in-right"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="7">
+                    <div class="empty-state">
+                      <i class="bi bi-inbox fs-1"></i>
+                      <div class="fw-bold mt-2">No requests found</div>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
-
-  <div class="card requests-card">
-    <div class="card-body p-0">
-      <div class="table-responsive">
-        <table class="table table-hover mb-0 requests-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Title</th>
-              <th>Status</th>
-              <th>Required Role</th>
-              <th>Creator</th>
-              <th class="date-cell">Date (Gregorian / Persian)</th>
-              <th class="text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for r in requests %}
-            <tr>
-              <td><span class="request-id">#{{ r.pk }}</span></td>
-              <td>
-                <a class="request-title-link" href="{% url 'request_detail' r.pk %}">
-                  {{ r.title }}
-                </a>
-              </td>
-              <td>
-                {% if r.status == "APPROVED" %}
-                  <span class="badge bg-success status-badge">✓ {{ r.status }}</span>
-                {% elif r.status == "REJECTED" %}
-                  <span class="badge bg-danger status-badge">✗ {{ r.status }}</span>
-                {% elif r.status == "CANCELLED" %}
-                  <span class="badge bg-secondary status-badge">⊗ {{ r.status }}</span>
-                {% else %}
-                  <span class="badge bg-dark status-badge">⟳ {{ r.status }}</span>
-                {% endif %}
-              </td>
-              <td>
-                <span class="text-muted small">{{ r.get_required_role_display }}</span>
-              </td>
-              <td>
-                <span class="creator-pill">
-                  <i class="bi bi-person-circle"></i>
-                  {{ r.created_by.username }}
-                </span>
-              </td>
-              <td class="date-cell">
-                <div class="dual-date">
-                  <div class="gregorian-date">
-                    <i class="bi bi-calendar3"></i> {{ r.created_at|date:"Y-m-d H:i" }}
-                  </div>
-                  <div class="persian-date">
-                    <i class="bi bi-calendar2-week"></i> {{ r.created_at|date:"Y-m-d"|to_persian_date }} {{ r.created_at|date:"H:i" }}
-                  </div>
-                </div>
-               </td>
-              <td class="text-center">
-                <a class="btn btn-sm btn-outline-primary action-btn"
-                   href="{% url 'request_detail' r.pk %}"
-                   title="View request">
-                  <i class="bi bi-box-arrow-in-right"></i>
-                </a>
-               </td>
-             </tr>
-            {% empty %}
-            <tr>
-              <td colspan="7">
-                <div class="empty-state">
-                  <i class="bi bi-inbox fs-1"></i>
-                  <div class="fw-bold mt-2">No requests found</div>
-                </div>
-               </td>
-             </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock %}
