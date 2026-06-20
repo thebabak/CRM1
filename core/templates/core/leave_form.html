@@ -196,6 +196,10 @@
         animation: fadeIn 0.3s ease-out;
     }
     
+    #hourly-fields {
+        display: none;
+    }
+    
     @media (max-width: 768px) {
         .stats-grid {
             grid-template-columns: 1fr;
@@ -576,4 +580,4 @@ document.addEventListener('DOMContentLoaded', () => {
     initForm();
 });
     </script>
-{% endblock %}
+{% endblock script %}
