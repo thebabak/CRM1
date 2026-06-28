@@ -16,4 +16,5 @@ urlpatterns = [
         name="robots_txt",
     ),
     path('letters/', include('internal_letter.urls')),
+    path('notifications/', include('notifications.urls')),
 ]

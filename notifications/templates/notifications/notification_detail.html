@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Notification{% endblock %}
+
+{% block content %}
+<style>
+  .detail-shell {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .detail-card {
+    border: 0;
+    border-radius: 26px;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+
+  .detail-header {
+    background: linear-gradient(135deg, #155f83 0%, #1C39BB 100%);
+    color: white;
+    padding: 2rem;
+  }
+
+  .detail-body {
+    padding: 2rem;
+    background: #fff;
+  }
+</style>
+
+<div class="detail-shell">
+  <div class="card detail-card">
+    <div class="detail-header">
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+          <div class="opacity-75 small mb-2">Notification</div>
+          <h1 class="h3 mb-2">{{ notification.title }}</h1>
+          <div class="opacity-75">
+            From {{ notification.sender.get_full_name|default:notification.sender.username }}
+          </div>
+        </div>
+        <span class="badge {% if delivery.read_at %}bg-success{% else %}bg-warning text-dark{% endif %}">
+          {% if delivery.read_at %}Read{% else %}Unread{% endif %}
+        </span>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <div class="mb-4 text-muted">
+        {% if notification.sent_at %}
+          Sent {{ notification.sent_at }}
+        {% else %}
+          Created {{ notification.created_at }}
+        {% endif %}
+      </div>
+
+      <div class="fs-5 lh-lg" style="white-space: pre-wrap;">{{ notification.body }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

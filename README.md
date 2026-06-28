@@ -12,6 +12,7 @@ A Django-based internal CRM system with request workflows, leave tracking, finan
   - Loans with approval flow
   - Expenses, incomes, budgets, bank accounts
 - Internal letter management
+- Notifications for manager broadcasts to all users or selected users
 - Django Admin customization
 
 ## Tech Stack

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Sent Notifications{% endblock %}
+
+{% block content %}
+<style>
+  .sent-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  .sent-hero {
+    border: 0;
+    border-radius: 26px;
+    background: linear-gradient(135deg, #0f4f70 0%, #155f83 100%);
+    color: #fff;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.12);
+  }
+
+  .sent-card {
+    border: 0;
+    border-radius: 24px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.07);
+    overflow: hidden;
+  }
+
+  .sent-row {
+    padding: 16px 18px;
+    border-bottom: 1px solid #eef2f7;
+    transition: background 0.2s ease;
+    cursor: pointer;
+  }
+
+  .sent-row:hover {
+    background: #f8fafc;
+  }
+</style>
+
+<div class="sent-shell">
+  <div class="card sent-hero mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <div class="small opacity-75 mb-2">Manager tools</div>
+          <h1 class="page-title mb-1">Sent Notifications</h1>
+          <div class="opacity-75">Review broadcasts and delivery status</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <a class="btn btn-light rounded-pill px-4" href="{% url 'notifications:create' %}">
+            <i class="bi bi-plus-square me-1"></i> New Notification
+          </a>
+          <a class="btn btn-outline-light rounded-pill px-4" href="{% url 'notifications:inbox' %}">
+            Inbox
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card sent-card">
+    {% for row in rows %}
+      <div class="sent-row" onclick="window.location.href='{% url 'notifications:sent_detail' row.notification.pk %}'">
+        <div class="row align-items-center g-3">
+          <div class="col-md-7">
+            <div class="fw-bold mb-1">{{ row.notification.title }}</div>
+            <div class="text-muted small">
+              {% if row.notification.send_to_all %}
+                Sent to all users
+              {% elif row.departments %}
+                Sent to department{{ row.departments|length|pluralize }}:
+                {% for department in row.departments %}{{ department.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+              {% else %}
+                Sent to selected users
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-md-3 text-muted small">
+            {% if row.notification.sent_at %}
+              {{ row.notification.sent_at|date:"M d, Y" }}
+            {% else %}
+              {{ row.notification.created_at|date:"M d, Y" }}
+            {% endif %}
+          </div>
+          <div class="col-md-2 text-md-end">
+            <span class="badge bg-primary">{{ row.read_count }}/{{ row.total_recipients }} read</span>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="text-center py-5">
+        <i class="bi bi-send" style="font-size: 3rem; color: #d1d5db;"></i>
+        <p class="text-muted mt-3 mb-0">No notifications sent yet</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

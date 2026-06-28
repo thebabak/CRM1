@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "core",
     "internal_letter",
+    "notifications",
      "finance"
 ]
 
@@ -90,6 +91,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 'core.context_processors.unread_letter_count',  # Add this line
+                'core.context_processors.unread_notification_count',
 
             ],
         },

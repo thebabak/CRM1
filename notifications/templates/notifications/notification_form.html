@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}New Notification{% endblock %}
+
+{% block content %}
+<style>
+  .compose-shell {
+    max-width: 1040px;
+    margin: 0 auto;
+  }
+
+  .compose-card {
+    border: 0;
+    border-radius: 26px;
+    overflow: hidden;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+  }
+
+  .compose-header {
+    background: linear-gradient(135deg, #155f83 0%, #1C39BB 100%);
+    color: #fff;
+    padding: 2rem;
+  }
+
+  .compose-body {
+    background: #fff;
+    padding: 2rem;
+  }
+</style>
+
+<div class="compose-shell">
+  <div class="card compose-card">
+    <div class="compose-header">
+      <div class="small opacity-75 mb-2">Manager broadcast</div>
+      <h1 class="h3 mb-0">Send a notification</h1>
+    </div>
+
+    <div class="compose-body">
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label fw-bold" for="id_title">Title</label>
+          {{ form.title }}
+          {{ form.title.errors }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold" for="id_body">Message</label>
+          {{ form.body }}
+          {{ form.body.errors }}
+        </div>
+
+        <div class="form-check mb-3">
+          {{ form.send_to_all }}
+          <label class="form-check-label fw-semibold" for="id_send_to_all">
+            Send to all users
+          </label>
+          {{ form.send_to_all.errors }}
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-bold" for="id_recipients">Choose users</label>
+          {{ form.recipients }}
+          <div class="form-text">Leave this empty when sending to everyone.</div>
+          {{ form.recipients.errors }}
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-bold" for="id_departments">Choose departments</label>
+          {{ form.departments }}
+          <div class="form-text">This sends the notification to every active user in the selected department(s).</div>
+          {{ form.departments.errors }}
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-primary rounded-pill px-4" type="submit">
+            <i class="bi bi-send me-1"></i> Send
+          </button>
+          <a class="btn btn-outline-secondary rounded-pill px-4" href="{% url 'notifications:inbox' %}">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<style>
+  .notify-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  .notify-hero {
+    border: 0;
+    border-radius: 26px;
+    background:
+      radial-gradient(circle at top right, rgba(21, 95, 131, 0.14), transparent 34%),
+      linear-gradient(135deg, #ffffff 0%, #eff6ff 52%, #f8fafc 100%);
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+
+  .notify-card {
+    border: 0;
+    border-radius: 24px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.07);
+    overflow: hidden;
+  }
+
+  .notify-row {
+    padding: 16px 18px;
+    border-bottom: 1px solid #eef2f7;
+    transition: background 0.2s ease;
+    cursor: pointer;
+  }
+
+  .notify-row:hover {
+    background: #f8fafc;
+  }
+
+  .notify-row.unread {
+    background: #eef6ff;
+  }
+
+  .notify-title {
+    font-weight: 800;
+    color: #111827;
+  }
+
+  .notify-meta {
+    color: #6b7280;
+    font-size: 13px;
+  }
+</style>
+
+<div class="notify-shell">
+  <div class="card notify-hero mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <div class="text-muted small mb-2"><i class="bi bi-bell me-1"></i> Notifications</div>
+          <h1 class="page-title mb-1">Inbox</h1>
+          <div class="text-muted">Messages sent by managers and administrators</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          {% if can_manage_notifications %}
+            <a class="btn btn-outline-secondary rounded-pill px-4" href="{% url 'notifications:sent' %}">
+              <i class="bi bi-send me-1"></i> Sent
+            </a>
+            <a class="btn btn-primary rounded-pill px-4" href="{% url 'notifications:create' %}">
+              <i class="bi bi-plus-square me-1"></i> New Notification
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card notify-card">
+    {% for delivery in deliveries %}
+      <div class="notify-row {% if delivery.read_at is None %}unread{% endif %}" onclick="window.location.href='{% url 'notifications:detail' delivery.pk %}'">
+        <div class="row align-items-center g-3">
+          <div class="col-md-7">
+            <div class="notify-title mb-1">
+              {% if delivery.read_at is None %}
+                <i class="bi bi-envelope-fill me-2 text-primary"></i>
+              {% else %}
+                <i class="bi bi-envelope-open me-2 text-secondary"></i>
+              {% endif %}
+              {{ delivery.notification.title }}
+            </div>
+            <div class="notify-meta">
+              From: {{ delivery.notification.sender.get_full_name|default:delivery.notification.sender.username }}
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="notify-meta">
+              <i class="bi bi-calendar me-1"></i>
+              {% if delivery.notification.sent_at %}
+                {{ delivery.notification.sent_at|date:"M d, Y" }}
+              {% else %}
+                {{ delivery.notification.created_at|date:"M d, Y" }}
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-md-2 text-md-end">
+            {% if delivery.read_at %}
+              <span class="badge bg-success">Read</span>
+            {% else %}
+              <span class="badge bg-primary">Unread</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="text-center py-5">
+        <i class="bi bi-bell" style="font-size: 3rem; color: #d1d5db;"></i>
+        <p class="text-muted mt-3 mb-0">No notifications yet</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

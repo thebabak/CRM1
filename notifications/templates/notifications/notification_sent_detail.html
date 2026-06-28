@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Notification Delivery{% endblock %}
+
+{% block content %}
+<style>
+  .sent-detail-shell {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  .sent-detail-card {
+    border: 0;
+    border-radius: 26px;
+    overflow: hidden;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+  }
+
+  .sent-detail-header {
+    background: linear-gradient(135deg, #155f83 0%, #1C39BB 100%);
+    color: #fff;
+    padding: 2rem;
+  }
+
+  .sent-detail-body {
+    background: #fff;
+    padding: 2rem;
+  }
+
+  .recipient-table td,
+  .recipient-table th {
+    vertical-align: middle;
+  }
+</style>
+
+<div class="sent-detail-shell">
+  <div class="card sent-detail-card">
+    <div class="sent-detail-header">
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+          <div class="small opacity-75 mb-2">Broadcast summary</div>
+          <h1 class="h3 mb-2">{{ notification.title }}</h1>
+          <div class="opacity-75">From your sent notifications</div>
+        </div>
+        <span class="badge bg-light text-dark">{{ read_count }}/{{ total_recipients }} read</span>
+      </div>
+    </div>
+
+    <div class="sent-detail-body">
+      <div class="mb-3">
+        <strong>Target:</strong>
+        {% if notification.send_to_all %}
+          All users
+        {% elif departments %}
+          Department{{ departments|length|pluralize }}:
+          {% for department in departments %}{{ department.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        {% else %}
+          Selected users
+        {% endif %}
+      </div>
+
+      <div class="mb-4 text-muted" style="white-space: pre-wrap;">{{ notification.body }}</div>
+
+      <div class="table-responsive">
+        <table class="table table-hover recipient-table align-middle">
+          <thead>
+            <tr>
+              <th>Recipient</th>
+              <th>Status</th>
+              <th>Sent</th>
+              <th>Read</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for delivery in deliveries %}
+              <tr>
+                <td>{{ delivery.recipient.get_full_name|default:delivery.recipient.username }}</td>
+                <td>{{ delivery.recipient.profile.get_role_display|default:'-' }}</td>
+                <td>{{ delivery.created_at|date:"M d, Y H:i" }}</td>
+                <td>
+                  {% if delivery.read_at %}
+                    <span class="badge bg-success">{{ delivery.read_at|date:"M d, Y H:i" }}</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Unread</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">No recipients found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
