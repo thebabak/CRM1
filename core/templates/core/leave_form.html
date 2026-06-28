@@ -1,8 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Leave Request | ATO CRM{% endblock %}
-
 {% block content %}
-<style>
+    <style>
     :root {
         --primary-color: #1C39BB;
         --success-color: #28a745;
@@ -197,6 +196,10 @@
         animation: fadeIn 0.3s ease-out;
     }
     
+    #hourly-fields {
+        display: none;
+    }
+    
     @media (max-width: 768px) {
         .stats-grid {
             grid-template-columns: 1fr;
@@ -206,183 +209,171 @@
             padding: 1rem;
         }
     }
-</style>
-
-<div class="leave-container">
-    <div class="card leave-card">
-        <div class="leave-header">
-            <h2>
-                <i class="bi bi-calendar-plus"></i> 
-                New Leave Request
-            </h2>
-            <p>Submit your leave request for approval</p>
-        </div>
-        
-        <div class="card-body p-4">
-            <!-- Leave Balance Statistics -->
-            {% if stats %}
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">
-                        <i class="bi bi-calendar-check"></i> Total Accrued
-                    </div>
-                    <div class="stat-value">{{ stats.accrued|floatformat:1 }}</div>
-                    <small class="text-muted">days per year</small>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">
-                        <i class="bi bi-clock-history"></i> Used
-                    </div>
-                    <div class="stat-value used">{{ stats.used|floatformat:1 }}</div>
-                    <small class="text-muted">days taken</small>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">
-                        <i class="bi bi-calendar-heart"></i> Remaining
-                    </div>
-                    <div class="stat-value remaining">{{ stats.remaining|floatformat:1 }}</div>
-                    <small class="text-muted">days available</small>
-                </div>
+    </style>
+    <div class="leave-container">
+        <div class="card leave-card">
+            <div class="leave-header">
+                <h2>
+                    <i class="bi bi-calendar-plus"></i>
+                    New Leave Request
+                </h2>
+                <p>Submit your leave request for approval</p>
             </div>
-            {% endif %}
-            
-            <form method="post" id="leaveForm">
-                {% csrf_token %}
-                
-                <!-- Leave Type & Mode Selection -->
-                <div class="form-section">
-                    <div class="form-section-title">
-                        <i class="bi bi-info-circle"></i>
-                        Leave Information
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">
-                                <i class="bi bi-tag"></i> Leave Type
-                            </label>
-                            {{ form.leave_type }}
+            <div class="card-body p-4">
+                <!-- Leave Balance Statistics -->
+                {% if stats %}
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">
+                                <i class="bi bi-calendar-check"></i> Total Accrued
+                            </div>
+                            <div class="stat-value">{{ stats.accrued|floatformat:1 }}</div>
+                            <small class="text-muted">days per year</small>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">
-                                <i class="bi bi-clock"></i> Mode
-                            </label>
-                            {{ form.mode }}
+                        <div class="stat-card">
+                            <div class="stat-label">
+                                <i class="bi bi-clock-history"></i> Used
+                            </div>
+                            <div class="stat-value used">{{ stats.used|floatformat:1 }}</div>
+                            <small class="text-muted">days taken</small>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">
+                                <i class="bi bi-calendar-heart"></i> Remaining
+                            </div>
+                            <div class="stat-value remaining">{{ stats.remaining|floatformat:1 }}</div>
+                            <small class="text-muted">days available</small>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Daily Leave Fields -->
-                <div id="daily-fields" class="mode-fields">
+                {% endif %}
+                <form method="post" id="leaveForm">
+                    {% csrf_token %}
+                    <!-- Leave Type & Mode Selection -->
                     <div class="form-section">
                         <div class="form-section-title">
-                            <i class="bi bi-calendar-week"></i>
-                            Daily Leave Details
+                            <i class="bi bi-info-circle"></i>
+                            Leave Information
                         </div>
                         <div class="row">
-                            <div class="col-md-5 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">
-                                    <i class="bi bi-calendar3"></i> From Date
+                                    <i class="bi bi-tag"></i> Leave Type
                                 </label>
-                                <div class="date-group">
-                                    {{ form.daily_from }}
-                                </div>
-                                <div class="persian-hint" id="persian_from_display">
-                                    <i class="bi bi-moon-stars"></i>
-                                    <span>🕌 Persian Date: <span class="persian-date-value">—</span></span>
-                                </div>
+                                {{ form.leave_type }}
                             </div>
-                            <div class="col-md-5 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">
-                                    <i class="bi bi-calendar3"></i> To Date
+                                    <i class="bi bi-clock"></i> Mode
                                 </label>
-                                <div class="date-group">
-                                    {{ form.daily_to }}
-                                </div>
-                                <div class="persian-hint" id="persian_to_display">
-                                    <i class="bi bi-moon-stars"></i>
-                                    <span>🕌 Persian Date: <span class="persian-date-value">—</span></span>
-                                </div>
+                                {{ form.mode }}
                             </div>
-                            <div class="col-md-2 mb-3">
-                                <label class="form-label">
-                                    <i class="bi bi-calculator"></i> Duration
-                                </label>
-                                {{ form.duration_days }}
-                                <div class="duration-preview" id="duration_preview">
-                                    <i class="bi bi-check-circle-fill"></i>
-                                    <span id="duration_text">0 days calculated</span>
+                        </div>
+                    </div>
+                    <!-- Daily Leave Fields -->
+                    <div id="daily-fields" class="mode-fields">
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-calendar-week"></i>
+                                Daily Leave Details
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-calendar3"></i> From Date
+                                    </label>
+                                    <div class="date-group">{{ form.daily_from }}</div>
+                                    <div class="persian-hint" id="persian_from_display">
+                                        <i class="bi bi-moon-stars"></i>
+                                        <span>🕌 Persian Date: <span class="persian-date-value">—</span></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-calendar3"></i> To Date
+                                    </label>
+                                    <div class="date-group">{{ form.daily_to }}</div>
+                                    <div class="persian-hint" id="persian_to_display">
+                                        <i class="bi bi-moon-stars"></i>
+                                        <span>🕌 Persian Date: <span class="persian-date-value">—</span></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-calculator"></i> Duration
+                                    </label>
+                                    {{ form.duration_days }}
+                                    <div class="duration-preview" id="duration_preview">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span id="duration_text">0 days calculated</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Hourly Leave Fields -->
-                <div id="hourly-fields" class="mode-fields" style="display: none;">
+                    <!-- Hourly Leave Fields -->
+                    <div id="hourly-fields" class="mode-fields" style="display: none;">
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-clock-history"></i>
+                                Hourly Leave Details
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-calendar-date"></i> Date
+                                    </label>
+                                    <div class="date-group">{{ form.hourly_date }}</div>
+                                    <div class="persian-hint" id="persian_hourly_display">
+                                        <i class="bi bi-moon-stars"></i>
+                                        <span>🕌 Persian Date: <span class="persian-date-value">—</span></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-sunrise"></i> From Time
+                                    </label>
+                                    {{ form.hourly_from }}
+                                    {% if form.hourly_from.errors %}<div class="text-danger small mt-1">{{ form.hourly_from.errors }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-sunset"></i> To Time
+                                    </label>
+                                    {{ form.hourly_to }}
+                                    {% if form.hourly_to.errors %}<div class="text-danger small mt-1">{{ form.hourly_to.errors }}</div>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Replacement Field -->
                     <div class="form-section">
                         <div class="form-section-title">
-                            <i class="bi bi-clock-history"></i>
-                            Hourly Leave Details
+                            <i class="bi bi-people"></i>
+                            Replacement
                         </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">
-                                    <i class="bi bi-calendar-date"></i> Date
-                                </label>
-                                <div class="date-group">
-                                    {{ form.hourly_date }}
-                                </div>
-                                <div class="persian-hint" id="persian_hourly_display">
-                                    <i class="bi bi-moon-stars"></i>
-                                    <span>🕌 Persian Date: <span class="persian-date-value">—</span></span>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">
-                                    <i class="bi bi-sunrise"></i> From Time
-                                </label>
-                                {{ form.hourly_from }}
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">
-                                    <i class="bi bi-sunset"></i> To Time
-                                </label>
-                                {{ form.hourly_from }}
+                        <div class="mb-3">
+                            {{ form.replacement }}
+                            <div class="replacement-help">
+                                <i class="bi bi-info-circle-fill"></i>
+                                {{ form.replacement.help_text }}
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Replacement Field -->
-                <div class="form-section">
-                    <div class="form-section-title">
-                        <i class="bi bi-people"></i>
-                        Replacement
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-3 mt-4">
+                        <a href="{% url 'request_new_hub' %}"
+                           class="btn btn-outline-secondary btn-cancel flex-grow-1">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-submit flex-grow-1">
+                            <i class="bi bi-send-check"></i> Submit Request
+                        </button>
                     </div>
-                    <div class="mb-3">
-                        {{ form.replacement }}
-                        <div class="replacement-help">
-                            <i class="bi bi-info-circle-fill"></i>
-                            {{ form.replacement.help_text }}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Action Buttons -->
-                <div class="d-flex gap-3 mt-4">
-                    <a href="{% url 'request_new_hub' %}" class="btn btn-outline-secondary btn-cancel flex-grow-1">
-                        <i class="bi bi-x-circle"></i> Cancel
-                    </a>
-                    <button type="submit" class="btn btn-primary btn-submit flex-grow-1">
-                        <i class="bi bi-send-check"></i> Submit Request
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-
-<script>
+    <script>
 // Persian digits mapping
 const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
 
@@ -588,5 +579,5 @@ document.addEventListener('DOMContentLoaded', () => {
     
     initForm();
 });
-</script>
-{% endblock %}
+    </script>
+{% endblock script %}
